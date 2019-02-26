@@ -12,6 +12,7 @@ using System.Windows.Media.Animation;
 
 namespace BabySmash
 {
+
     public class WordFinder
     {
         private const int MinimumWordLength = 2, MaximumWordLength = 15;
@@ -62,7 +63,7 @@ namespace BabySmash
             t.Start();
         }
 
-        public string LastWord(List<UserControl> figuresQueue)
+        public virtual string LastWord(List<UserControl> figuresQueue)
         {
             // If not done loading, or could not yet form a word based on queue length, just abort.
             int figuresPos = figuresQueue.Count - 1;
@@ -116,7 +117,7 @@ namespace BabySmash
 
             // Figure out where to move each letter used in the word; find the letters used based on
             // the word length; they are the last several figures in the figures queue.
-            for (int i = figuresQueue.Count - 1; i >= figuresQueue.Count - totalLetters; i--)
+            for (int i = figuresQueue.Count - 1; i >= 0 && i >= figuresQueue.Count - totalLetters; i--)
             {
                 UserControl currentFigure = figuresQueue[i];
 
@@ -128,7 +129,7 @@ namespace BabySmash
                 // sizes, and now just need to figure out how far from that left edge we need to adjust
                 // to make this letter move to the correct relative position to spell out the word.
                 double wordOffsetX = 0d;
-                for (int j = figuresQueue.Count - totalLetters; j < i; j++)
+                for (int j = figuresQueue.Count - totalLetters; j >= 0 && j < i; j++)
                 {
                     wordOffsetX += figuresQueue[j].Width;
                 }
