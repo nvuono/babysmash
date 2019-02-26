@@ -59,5 +59,15 @@ namespace BabySmash.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] vocabulary {
+            get {
+                object obj = ResourceManager.GetObject("vocabulary", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
