@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BabySmash
 {
-    class Vocabulary
+    class ImageVocabulary
     {
 
         string _resourceFileName = "vocabulary.zip";
@@ -19,7 +19,7 @@ namespace BabySmash
         /// any reasonable 2010+ PC but you'd probably want to implement some LRU caching
         /// if you wind up using a significantly larger corpus of images
         /// </summary>
-        public Vocabulary()
+        public ImageVocabulary()
         {
             using (ZipArchive za = new ZipArchive(new MemoryStream(Properties.Resources.vocabulary)))
             {

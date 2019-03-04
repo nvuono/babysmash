@@ -43,6 +43,10 @@ namespace BabySmash
             {
                 retVal = new CoolLetter(template.Fill.Clone(), template.Letter[0]);
             }
+            else if (Char.IsLetterOrDigit(template.Letter[0]))
+            {
+                retVal = new CoolImage(template.Fill.Clone(), template.Letter[0], template.Name, template.Color);
+            }
             else
             {
                 retVal = template.GeneratorFunc(template.Fill.Clone());

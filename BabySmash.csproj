@@ -69,9 +69,16 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DemandController.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
+    <Compile Include="KeyControl.cs" />
     <Compile Include="Shapes\BabySmashShape.cs" />
-    <Compile Include="Vocabulary.cs" />
+    <Compile Include="Shapes\CoolImage.xaml.cs">
+      <DependentUpon>CoolImage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SmashController.cs" />
+    <Compile Include="ThreadedSpeak.cs" />
+    <Compile Include="ImageVocabulary.cs" />
     <Compile Include="VocabularyWordFinder.cs" />
     <Compile Include="WordFinder.cs" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -131,6 +138,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Shapes\CoolSquare.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Shapes\CoolImage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -63,6 +63,11 @@ namespace BabySmash
             t.Start();
         }
 
+        /// <summary>
+        /// Determine if there is a word contained within most recently pressed keys
+        /// </summary>
+        /// <param name="figuresQueue"></param>
+        /// <returns></returns>
         public virtual string LastWord(List<UserControl> figuresQueue)
         {
             // If not done loading, or could not yet form a word based on queue length, just abort.

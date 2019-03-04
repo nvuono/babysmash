@@ -1,11 +1,11 @@
-﻿using System;
+﻿using BabySmash.Properties;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Deployment.Application;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,19 +14,16 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using BabySmash.Properties;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using WinForms = System.Windows.Forms;
 
 namespace BabySmash
 {
+    using Newtonsoft.Json;
     using System.Globalization;
     using System.IO;
     using System.Speech.Synthesis;
-    using System.Text;
-
-    using Newtonsoft.Json;
 
     public class Controller
     {
@@ -37,6 +34,8 @@ namespace BabySmash
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         private static Controller instance = new Controller();
+        private static DemandController demandController = new DemandController();
+        private static ImageVocabulary imgVocab = new ImageVocabulary();
 
         public bool isOptionsDialogShown { get; set; }
         private bool isDrawing = false;
@@ -98,8 +97,8 @@ namespace BabySmash
         public void Launch()
         {
             timer.Tick += new EventHandler(timer_Tick);
-            timer.Interval = new TimeSpan(0, 0, 1);
-            int Number = 0;
+            timer.Interval = new TimeSpan(0, 0, 1); // 1 second timer tick default
+            int windowNumber = 0;
 
             if (ApplicationDeployment.IsNetworkDeployed)
             {
@@ -119,27 +118,57 @@ namespace BabySmash
 
             foreach (WinForms.Screen s in WinForms.Screen.AllScreens)
             {
-                MainWindow m = new MainWindow(this)
+                MainWindow m = null;
+
+                                if (System.Diagnostics.Debugger.IsAttached)
                 {
-                    WindowStartupLocation = WindowStartupLocation.Manual,
-                    Left = s.WorkingArea.Left,
-                    Top = s.WorkingArea.Top,
-                    Width = s.WorkingArea.Width,
-                    Height = s.WorkingArea.Height,
-                    WindowStyle = WindowStyle.None,
-                    ResizeMode = ResizeMode.NoResize,
-                    Topmost = true,
-                    AllowsTransparency = Settings.Default.TransparentBackground,
-                    Background = (Settings.Default.TransparentBackground ? new SolidColorBrush(Color.FromArgb(1, 0, 0, 0)) : Brushes.WhiteSmoke),
-                    Name = "Window" + Number++.ToString()
-                };
+                    m = new MainWindow(this)
+                    {
+                        WindowStartupLocation = WindowStartupLocation.Manual,
+                        Left = 10,
+                        Top = 10,
+                        Width = 800,
+                        Height = 600,
+                        WindowStyle = WindowStyle.SingleBorderWindow,
+                        ResizeMode = ResizeMode.CanResize,
+                        Topmost = true,
+                        AllowsTransparency = Settings.Default.TransparentBackground,
+                        Background = (Settings.Default.TransparentBackground ? new SolidColorBrush(Color.FromArgb(1, 0, 0, 0)) : Brushes.WhiteSmoke),
+                        Name = "Window" + windowNumber++.ToString()
+                    };
+                }
+                else
+                {
+                    m= new MainWindow(this)
+                    {
+                        WindowStartupLocation = WindowStartupLocation.Manual,
+                        Left = s.WorkingArea.Left,
+                        Top = s.WorkingArea.Top,
+                        Width = s.WorkingArea.Width,
+                        Height = s.WorkingArea.Height,
+                        WindowStyle = WindowStyle.None,
+                        ResizeMode = ResizeMode.NoResize,
+                        Topmost = true,
+                        AllowsTransparency = Settings.Default.TransparentBackground,
+                        Background = (Settings.Default.TransparentBackground ? new SolidColorBrush(Color.FromArgb(1, 0, 0, 0)) : Brushes.WhiteSmoke),
+                        Name = "Window" + windowNumber++.ToString()
+                    };
+                }
 
                 figuresUserControlQueue[m.Name] = new List<UserControl>();
 
                 m.Show();
                 m.MouseLeftButtonDown += HandleMouseLeftButtonDown;
                 m.MouseWheel += HandleMouseWheel;
-                m.WindowState = WindowState.Maximized;
+                if (System.Diagnostics.Debugger.IsAttached)
+                {
+                    m.WindowState = WindowState.Normal;
+                }
+                else
+                {
+                    m.WindowState = WindowState.Maximized;
+                }
+
                 windows.Add(m);
             }
 
@@ -160,28 +189,44 @@ namespace BabySmash
                     ShowOptionsDialog();
                 }
             }
-#if !false
             timer.Start();
-#endif
+        }
+
+        /// <summary>
+        /// single place to add reasons why we shouldn't grab full focus
+        /// </summary>
+        /// <returns></returns>
+        bool shouldGrabFocus()
+        {
+            if(System.Diagnostics.Debugger.IsAttached || isOptionsDialogShown)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         void timer_Tick(object sender, EventArgs e)
         {
-            if (isOptionsDialogShown)
+            Debug.WriteLine("timer_Tick");
+            if (shouldGrabFocus())
             {
-                return;
+                try
+                {
+                    IntPtr windowHandle = new WindowInteropHelper(Application.Current.MainWindow).Handle;
+                    SetForegroundWindow(windowHandle);
+                    SetFocus(windowHandle);
+                }
+                catch (Exception)
+                {
+                    //Wish me luck!
+                }
             }
+            // process demands here
+            demandController.Tick();
 
-            try
-            {
-                IntPtr windowHandle = new WindowInteropHelper(Application.Current.MainWindow).Handle;
-                SetForegroundWindow(windowHandle);
-                SetFocus(windowHandle);
-            }
-            catch (Exception)
-            {
-                //Wish me luck!
-            }
         }
 
         public void ProcessKey(FrameworkElement uie, KeyEventArgs e)
@@ -211,7 +256,7 @@ namespace BabySmash
 
             try
             {
-                return char.ToUpperInvariant(TryGetLetter(key));
+                return char.ToUpperInvariant(KeyControl.TryGetLetter(key));
             }
             catch (Exception ex)
             {
@@ -220,61 +265,6 @@ namespace BabySmash
             }
         }
 
-        public enum MapType : uint
-        {
-            MAPVK_VK_TO_VSC = 0x0,
-            MAPVK_VSC_TO_VK = 0x1,
-            MAPVK_VK_TO_CHAR = 0x2,
-            MAPVK_VSC_TO_VK_EX = 0x3,
-        }
-
-        [DllImport("user32.dll")]
-        public static extern int ToUnicode(
-                uint wVirtKey,
-                uint wScanCode,
-                byte[] lpKeyState,
-                [Out, MarshalAs(UnmanagedType.LPWStr, SizeParamIndex = 4)]
-                        StringBuilder pwszBuff,
-                int cchBuff,
-                uint wFlags);
-
-        [DllImport("user32.dll")]
-        public static extern bool GetKeyboardState(byte[] lpKeyState);
-
-        [DllImport("user32.dll")]
-        public static extern uint MapVirtualKey(uint uCode, MapType uMapType);
-
-        private static char TryGetLetter(Key key)
-        {
-            char ch = ' ';
-
-            int virtualKey = KeyInterop.VirtualKeyFromKey(key);
-            byte[] keyboardState = new byte[256];
-            GetKeyboardState(keyboardState);
-
-            uint scanCode = MapVirtualKey((uint)virtualKey, MapType.MAPVK_VK_TO_VSC);
-            StringBuilder stringBuilder = new StringBuilder(2);
-
-            int result = ToUnicode((uint)virtualKey, scanCode, keyboardState, stringBuilder, stringBuilder.Capacity, 0);
-            switch (result)
-            {
-                case -1:
-                    break;
-                case 0:
-                    break;
-                case 1:
-                    {
-                        ch = stringBuilder[0];
-                        break;
-                    }
-                default:
-                    {
-                        ch = stringBuilder[0];
-                        break;
-                    }
-            }
-            return ch;
-        }
 
         private void AddFigure(FrameworkElement uie, char c)
         {
@@ -450,58 +440,7 @@ namespace BabySmash
             ts.Speak();
         }
 
-        private class ThreadedSpeak
-        {
-            private string Word = null;
-            SpeechSynthesizer SpeechSynth = new SpeechSynthesizer();
-            public ThreadedSpeak(string Word)
-            {
-                this.Word = Word;
-                CultureInfo keyboardLanguage = System.Windows.Forms.InputLanguage.CurrentInputLanguage.Culture;
-                InstalledVoice neededVoice = this.SpeechSynth.GetInstalledVoices(keyboardLanguage).FirstOrDefault();
-                if (neededVoice == null)
-                {
-                    //http://superuser.com/questions/590779/how-to-install-more-voices-to-windows-speech
-                    //https://msdn.microsoft.com/en-us/library/windows.media.speechsynthesis.speechsynthesizer.voice.aspx
-                    //http://stackoverflow.com/questions/34776593/speechsynthesizer-selectvoice-fails-with-no-matching-voice-is-installed-or-th
-                    this.Word = "Unsupported Language";
-                }
-                else if (!neededVoice.Enabled)
-                {
-                    this.Word = "Voice Disabled";
-                }
-                else
-                {
-                    try
-                    {
-                        this.SpeechSynth.SelectVoice(neededVoice.VoiceInfo.Name);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.Assert(false, ex.ToString());
-                    }
-                }
-
-                SpeechSynth.Rate = -1;
-                SpeechSynth.Volume = 100;
-            }
-            public void Speak()
-            {
-                Thread oThread = new Thread(new ThreadStart(this.Start));
-                oThread.Start();
-            }
-            private void Start()
-            {
-                try
-                {
-                    SpeechSynth.Speak(Word);
-                }
-                catch (Exception e)
-                {
-                    System.Diagnostics.Trace.WriteLine(e.ToString());
-                }
-            }
-        }
+        
 
         public void ShowOptionsDialog()
         {
