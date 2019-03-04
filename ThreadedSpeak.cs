@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BabySmash.Music;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -18,7 +19,7 @@ namespace BabySmash
         {
             this.Word = Word;
             CultureInfo keyboardLanguage = System.Windows.Forms.InputLanguage.CurrentInputLanguage.Culture;
-            InstalledVoice neededVoice = this.SpeechSynth.GetInstalledVoices(keyboardLanguage).FirstOrDefault();
+            InstalledVoice neededVoice = this.SpeechSynth.GetInstalledVoices(keyboardLanguage).LastOrDefault();
             if (neededVoice == null)
             {
                 //http://superuser.com/questions/590779/how-to-install-more-voices-to-windows-speech
@@ -54,12 +55,22 @@ namespace BabySmash
         {
             try
             {
-                SpeechSynth.Speak(Word);
+                var pb1 = new PromptBuilder();
+                var pitch = SongProvider.song.GetNextNote().Pitch;
+                string freqHz = pitch.Freq.ToString("0") + "Hz";
+                pb1.AppendSsmlMarkup("<prosody pitch=\""+freqHz+"\" rate=\"slow\">"+Word+"</prosody >");
+                System.Diagnostics.Debug.WriteLine(freqHz);
+                
+                SpeechSynth.Speak(pb1);
+                System.IO.MemoryStream ms = new System.IO.MemoryStream();
+                SpeechSynth.SetOutputToWaveStream(ms);
+                //Mike.Rules.PitchShifter.PitchShift(pitch.Freq,,44600,ms.)
             }
             catch (Exception e)
             {
                 System.Diagnostics.Trace.WriteLine(e.ToString());
             }
         }
+
     }
 }

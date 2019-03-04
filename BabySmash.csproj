@@ -72,6 +72,8 @@
     <Compile Include="DemandController.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="KeyControl.cs" />
+    <Compile Include="Music\Note.cs" />
+    <Compile Include="Music\Pitch.cs" />
     <Compile Include="Shapes\BabySmashShape.cs" />
     <Compile Include="Shapes\CoolImage.xaml.cs">
       <DependentUpon>CoolImage.xaml</DependentUpon>

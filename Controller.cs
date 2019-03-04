@@ -35,7 +35,7 @@ namespace BabySmash
 
         private static Controller instance = new Controller();
         private static DemandController demandController = new DemandController();
-        private static ImageVocabulary imgVocab = new ImageVocabulary();
+        private static ImageVocabulary imgVocab = null;
 
         public bool isOptionsDialogShown { get; set; }
         private bool isDrawing = false;
@@ -96,6 +96,7 @@ namespace BabySmash
 
         public void Launch()
         {
+            imgVocab = new ImageVocabulary();
             timer.Tick += new EventHandler(timer_Tick);
             timer.Interval = new TimeSpan(0, 0, 1); // 1 second timer tick default
             int windowNumber = 0;
@@ -236,34 +237,10 @@ namespace BabySmash
                 uie.ReleaseMouseCapture();
             }
             
-            char displayChar = GetDisplayChar(e.Key);
+            char displayChar = KeyControl.GetDisplayChar(e.Key);
             AddFigure(uie, displayChar);
         }
 
-        private char GetDisplayChar(Key key)
-        {
-            // If a number on the normal number track is pressed, display the number.
-            if (key >= Key.D0 && key <= Key.D9)
-            {
-                return (char)('0' + key - Key.D0);
-            }
-
-            // If a number on the numpad is pressed, display the number.
-            if (key >= Key.NumPad0 && key <= Key.NumPad9)
-            {
-                return (char)('0' + key - Key.NumPad0);
-            }
-
-            try
-            {
-                return char.ToUpperInvariant(KeyControl.TryGetLetter(key));
-            }
-            catch (Exception ex)
-            {
-                Debug.Assert(false, ex.ToString());
-                return '*';
-            }
-        }
 
 
         private void AddFigure(FrameworkElement uie, char c)

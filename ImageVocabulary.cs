@@ -12,7 +12,7 @@ namespace BabySmash
 
         string _resourceFileName = "vocabulary.zip";
         Dictionary<string, byte[]> WordToByteDict = new Dictionary<string, byte[]>();
-
+        Dictionary<string, List<string>> WordToFileNameDict = new Dictionary<string, List<string>>();
         /// <summary>
         /// Keeps track of all vocabulary items and loads them ALL into memory
         /// I've only got a sample corpus of 1-2MB so this shouldn't be an issue for
@@ -30,9 +30,15 @@ namespace BabySmash
                     if (entry.Name.ToLowerInvariant().EndsWith(".png") && entry.Length < 256000)
                     {
                         var stream = entry.Open();
-                        byte[] buff = new byte[stream.Length];
-                        stream.Read(buff, 0, (int)stream.Length);
-                        WordToByteDict.Add(SimplifyFileName(entry.Name), buff);
+                        byte[] buff = new byte[entry.Length];
+                        stream.Read(buff, 0, (int)entry.Length);
+                        string simpleName = SimplifyFileName(entry.Name);
+                        WordToByteDict.Add(entry.Name, buff);
+                        if (!WordToFileNameDict.ContainsKey(simpleName))
+                        {
+                            WordToFileNameDict.Add(simpleName, new List<string>());
+                        }
+                        WordToFileNameDict[simpleName].Add(entry.Name);
                     }
                 }
             }

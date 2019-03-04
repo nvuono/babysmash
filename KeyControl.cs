@@ -10,6 +10,31 @@ namespace BabySmash
 {
     class KeyControl
     {
+        public static char GetDisplayChar(Key key)
+        {
+            // If a number on the normal number track is pressed, display the number.
+            if (key >= Key.D0 && key <= Key.D9)
+            {
+                return (char)('0' + key - Key.D0);
+            }
+
+            // If a number on the numpad is pressed, display the number.
+            if (key >= Key.NumPad0 && key <= Key.NumPad9)
+            {
+                return (char)('0' + key - Key.NumPad0);
+            }
+
+            try
+            {
+                return char.ToUpperInvariant(KeyControl.TryGetLetter(key));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.Assert(false, ex.ToString());
+                return '*';
+            }
+        }
+
         public enum MapType : uint
         {
             MAPVK_VK_TO_VSC = 0x0,
