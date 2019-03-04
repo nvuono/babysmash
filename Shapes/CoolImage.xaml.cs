@@ -22,10 +22,9 @@ namespace BabySmash
 
         public CoolImage(System.Windows.Media.Brush x, char letter, string itemName, Color templateColor) : this()
         {
-            string imgPath = "C:\\projects\\babysmash\\vocabulary\\" + itemName + ".png";
-            if (System.IO.File.Exists(imgPath))
-            {
-                Stream imageStream = new FileStream(imgPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var stream = Controller.ImageVocab.GetImageForWord(itemName);
+            if (stream != null) { 
+                Stream imageStream = new MemoryStream(stream);
                 PngBitmapDecoder decoder = new PngBitmapDecoder(imageStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
                 BitmapSource myBitmapSource = decoder.Frames[0];
                 WriteableBitmap wBmp = new WriteableBitmap(myBitmapSource);

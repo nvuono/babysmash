@@ -68,7 +68,7 @@ namespace BabySmash
 
         public void DrawDemand(FrameworkElement uie, char c)
         {
-            FigureTemplate template = FigureGenerator.GenerateFigureTemplate(c);
+            FigureTemplate template = FigureGenerator.GenerateFigureTemplate(c.ToString());
             foreach (MainWindow window in this.windows)
             {
                 UserControl f = FigureGenerator.NewUserControlFrom(template);

@@ -7,11 +7,10 @@ using System.Text;
 
 namespace BabySmash
 {
-    class ImageVocabulary
+    public class ImageVocabulary
     {
-
         string _resourceFileName = "vocabulary.zip";
-        Dictionary<string, byte[]> WordToByteDict = new Dictionary<string, byte[]>();
+        Dictionary<string, byte[]> FileNameToByteDict = new Dictionary<string, byte[]>();
         Dictionary<string, List<string>> WordToFileNameDict = new Dictionary<string, List<string>>();
         /// <summary>
         /// Keeps track of all vocabulary items and loads them ALL into memory
@@ -33,7 +32,7 @@ namespace BabySmash
                         byte[] buff = new byte[entry.Length];
                         stream.Read(buff, 0, (int)entry.Length);
                         string simpleName = SimplifyFileName(entry.Name);
-                        WordToByteDict.Add(entry.Name, buff);
+                        FileNameToByteDict.Add(entry.Name, buff);
                         if (!WordToFileNameDict.ContainsKey(simpleName))
                         {
                             WordToFileNameDict.Add(simpleName, new List<string>());
@@ -57,7 +56,26 @@ namespace BabySmash
             {
                 returnString = filename.Split('_')[0];
             }
+            if (filename.IndexOf(".png")>0)
+            {
+                returnString = returnString.Replace(".png", "")
+;            }
             return returnString;
+        }
+
+        public  byte[] GetImageForWord(string word)
+        {
+            byte[] retBytes = null;
+            if (WordToFileNameDict.ContainsKey(word) && FileNameToByteDict.ContainsKey(WordToFileNameDict[word].FirstOrDefault())){
+                var fileName = WordToFileNameDict[word].FirstOrDefault();
+                retBytes = FileNameToByteDict[fileName];
+            }
+            return retBytes;
+        }
+
+        public string GetWordBasedOnFirstLetter(char letter)
+        {
+            return WordToFileNameDict.Keys.Where(i => i.StartsWith(letter.ToString())).FirstOrDefault();
         }
     }
 }

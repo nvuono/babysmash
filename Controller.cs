@@ -35,7 +35,7 @@ namespace BabySmash
 
         private static Controller instance = new Controller();
         private static DemandController demandController = new DemandController();
-        private static ImageVocabulary imgVocab = null;
+        public static ImageVocabulary ImageVocab = null;
 
         public bool isOptionsDialogShown { get; set; }
         private bool isDrawing = false;
@@ -96,7 +96,7 @@ namespace BabySmash
 
         public void Launch()
         {
-            imgVocab = new ImageVocabulary();
+            ImageVocab = new ImageVocabulary();
             timer.Tick += new EventHandler(timer_Tick);
             timer.Interval = new TimeSpan(0, 0, 1); // 1 second timer tick default
             int windowNumber = 0;
@@ -245,8 +245,22 @@ namespace BabySmash
 
         private void AddFigure(FrameworkElement uie, char c)
         {
-            FigureTemplate template = FigureGenerator.GenerateFigureTemplate(c);
-            foreach (MainWindow window in this.windows)
+            string word = c.ToString();
+            FigureTemplate template = null;
+            bool generateWordBasedOnSingleLetter = true;
+            if (generateWordBasedOnSingleLetter)
+            {
+                word = ImageVocab.GetWordBasedOnFirstLetter(c);
+
+                if (String.IsNullOrWhiteSpace(word))
+                {
+                    word = c.ToString();
+                }
+            }
+            
+                template = FigureGenerator.GenerateFigureTemplate(word);
+            
+                foreach (MainWindow window in this.windows)
             {
                 UserControl f = FigureGenerator.NewUserControlFrom(template);
                 window.AddFigure(f);

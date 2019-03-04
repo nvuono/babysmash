@@ -76,16 +76,15 @@ namespace BabySmash
         //TODO: Should this be in XAML? Would that make it better?
         //TODO: Should I change the height, width and stroke to be relative to the screen size?
         //TODO: Where can I get REALLY complex shapes like animal vectors or custom pics? Where do I store them?
-
-        public static FigureTemplate GenerateFigureTemplate(char displayChar)
+        public static FigureTemplate GenerateFigureTemplate(string displayString)
         {
             Color c = Utils.GetRandomColor();
 
             string name = null;
             KeyValuePair<BabySmashShape, BrushControlFunc> nameFunc = hashTableOfFigureGenerators[Utils.RandomBetweenTwoNumbers(0, hashTableOfFigureGenerators.Count - 1)];
-            if (Char.IsLetterOrDigit(displayChar))
+            if (Char.IsLetterOrDigit(displayString[0]))
             {
-                name = displayChar.ToString();
+                name = displayString.ToString();
             }
             else
             {
@@ -98,9 +97,10 @@ namespace BabySmash
                 Name = name,
                 GeneratorFunc = nameFunc.Value,
                 Fill = Utils.GetGradientBrush(c),
-                Letter = displayChar.ToString(),
+                Letter = displayString.ToString(),
                 Effect = Animation.GetRandomBitmapEffect()
             };
         }
+
     }
 }
