@@ -1,3 +1,25 @@
+##updates by nvuono
+Expanded on usage of vocabulary words:
+* When a letter is pressed, we do some vocabulary lookups to see if we have an image that starts with that letter
+* pressing A brings up an acorn, D brings up a dog, etc
+
+Added a couple methods of pulling in images to support vocabulary:
+* Easiest method is using emoji based on the Windows 8 segoe UI emoji availability. This just renders the black and white emojis but that's fine for our purposes.
+* Second method allows a png to be loaded from a Vocabulary.zip file where the filename. 
+
+Images have a color applied to them the same way that other letters and shapes get a color:
+* We do a basic RGB threshold calculation for every pixel to "leave it blank" or force it to the selected color
+
+Started framework for adding some kind of basic game functions to match what you might find in little toy laptops, speak-n-spell, etc.
+
+The thought is that there would be a "demand" which would encapsulate several types of requests:
+ * asking to type out the numbers 1 to 10
+ * repeating the letters of a given word (with or without image)
+ * spelling a word based only on the image and speech
+
+ Added some musical framework for possibly doing something like singing the A-B-C song but the text-to-speech engine is really picky about the prosody rate values for built-in voices so I'm not sure if that will go anywhere.
+ 
+=========
 BabySmash
 =========
 
