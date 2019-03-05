@@ -154,5 +154,29 @@ namespace BabySmash.Properties {
                 this["TransparentBackground"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public string UseEffects {
+            get {
+                return ((string)(this["UseEffects"]));
+            }
+            set {
+                this["UseEffects"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string KeyboardName {
+            get {
+                return ((string)(this["KeyboardName"]));
+            }
+            set {
+                this["KeyboardName"] = value;
+            }
+        }
     }
 }

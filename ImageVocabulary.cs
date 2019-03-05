@@ -9,6 +9,8 @@ namespace BabySmash
 {
     public class ImageVocabulary
     {
+        private static Random rnd = new Random(); // not threadsafe but I think we'll be ok
+
         string _resourceFileName = "vocabulary.zip";
         Dictionary<string, byte[]> FileNameToByteDict = new Dictionary<string, byte[]>();
         Dictionary<string, List<string>> WordToFileNameDict = new Dictionary<string, List<string>>();
@@ -75,7 +77,70 @@ namespace BabySmash
 
         public string GetWordBasedOnFirstLetter(char letter)
         {
-            return WordToFileNameDict.Keys.Where(i => i.StartsWith(letter.ToString())).FirstOrDefault();
+            string retWord = null;
+            var allWordsForLetter = WordToFileNameDict.Keys.Where(i => i.StartsWith(letter.ToString()));
+            if (allWordsForLetter.Any())
+            {
+                retWord = allWordsForLetter.ElementAt(rnd.Next(allWordsForLetter.Count()));               
+            }
+            return retWord;
+        }
+
+
+        public static Dictionary<string, string> GetEmojiImageDict()
+        {
+            string[] strEmojis = "🤖,🐶,🐺,🐱,🦁,🐯,🦒,🦊,🐮,🐷,🐗,🐭,🐹,🐰,🐻,🐨,🐼,🐸,🦓,🐴,🦄,🐔,🐲".Split(',');
+            int strCount = 0;
+            Dictionary<string, string> emojiDict = new Dictionary<string, string>();
+            emojiDict.Add("ghost", "👻");
+            emojiDict.Add("robot", strEmojis[strCount++].ToString());
+            emojiDict.Add("dog", strEmojis[strCount++].ToString());
+            emojiDict.Add("wolf", strEmojis[strCount++].ToString());
+            emojiDict.Add("cat", strEmojis[strCount++].ToString());
+            emojiDict.Add("lion", strEmojis[strCount++].ToString());
+            emojiDict.Add("tiger", strEmojis[strCount++].ToString());
+            emojiDict.Add("giraffe", strEmojis[strCount++].ToString());
+            emojiDict.Add("fox", strEmojis[strCount++].ToString());
+            emojiDict.Add("cow", strEmojis[strCount++].ToString());
+            emojiDict.Add("pig", strEmojis[strCount++].ToString());
+            emojiDict.Add("panda", strEmojis[strCount++].ToString());
+            emojiDict.Add("frog", strEmojis[strCount++].ToString());
+            emojiDict.Add("zebra", strEmojis[strCount++].ToString());
+            emojiDict.Add("horse", strEmojis[strCount++].ToString());
+            emojiDict.Add("unicorn", strEmojis[strCount++].ToString());
+            emojiDict.Add("rooster", strEmojis[strCount++].ToString());
+            emojiDict.Add("dragon", strEmojis[strCount++].ToString());
+
+            strEmojis = "🐩,🦌,🦍,🦏,🐒,🐄,🐖,🐏,🐑,🐐,🐪,🐘,🐁,🐀,🦔,🐇".Split(',');
+            strCount = 0;
+            emojiDict.Add("poodle", strEmojis[strCount++].ToString());
+            emojiDict.Add("reindeer", strEmojis[strCount++].ToString());
+            emojiDict.Add("gorilla", strEmojis[strCount++].ToString());
+            emojiDict.Add("rhino", strEmojis[strCount++].ToString());
+            emojiDict.Add("monkey_2", strEmojis[strCount++].ToString());
+            emojiDict.Add("cow_2", strEmojis[strCount++].ToString());
+            emojiDict.Add("pig_2", strEmojis[strCount++].ToString());
+            emojiDict.Add("ram", strEmojis[strCount++].ToString());
+            emojiDict.Add("sheep", strEmojis[strCount++].ToString());
+            emojiDict.Add("goat", strEmojis[strCount++].ToString());
+            emojiDict.Add("camel", strEmojis[strCount++].ToString());
+            emojiDict.Add("elephant", strEmojis[strCount++].ToString());
+            emojiDict.Add("mouse", strEmojis[strCount++].ToString());
+            emojiDict.Add("rat", strEmojis[strCount++].ToString());
+            emojiDict.Add("hedgehog", strEmojis[strCount++].ToString());
+            emojiDict.Add("rabbit", strEmojis[strCount++].ToString());
+
+            /*
+            strEmojis = "🐿🦎🐊🐢🐍🐉🦕🦖🦈🐬🦑🐳🐋🐟🐠🦐🐡🐙🐚🦀🦅🦆🦉🦃🐓";
+            strCount = 0;
+
+            strEmojis = "🐣🐤🐥🐦🐧🕊🦇🦋🐌🐛🦗🐜🐝🐞🦂🕷🕸👄🧠👅👀👶🛀🏄‍♀️🏄‍♂️";
+            strCount = 0;
+            
+            strEmojis = "🏌️‍♀️🏌️‍♂️🏂🎨🏆🥁🎷🎸🎺🎻🎧🎤🔨🔑🔒💣💰✏🖌🖋✂📌⏰🗑🥨🍩🍪";
+            strCount = 0;
+            */
+            return emojiDict;
         }
     }
 }

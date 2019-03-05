@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,6 +23,8 @@ namespace BabySmash
 
     public class FigureGenerator
     {
+        private static Random rnd = new Random(); // not really threadsafe but our babies will be ok
+
         private static readonly List<KeyValuePair<BabySmashShape, BrushControlFunc>> hashTableOfFigureGenerators = new List<KeyValuePair<BabySmashShape, BrushControlFunc>>
              {
                      new KeyValuePair<BabySmashShape, BrushControlFunc>(BabySmashShape.Circle, x => new CoolCircle(x) ),
@@ -38,8 +41,19 @@ namespace BabySmash
         public static UserControl NewUserControlFrom(FigureTemplate template)
         {
             UserControl retVal = null;
+            if (template.Letter=="W")
+            {
+                var emojiDict = ImageVocabulary.GetEmojiImageDict();
+                //System.Collections.Generic.List<string> emojiItems = new System.Collections.Generic.List<string>()
+                //{"💣","💰","✏","🖌","🖋","✂","📌","⏰","🗑","🥨","🍩","🍪","🐷" };
+                string rndKey = emojiDict.Keys.ElementAt(rnd.Next(emojiDict.Keys.Count));
+                string emoji = emojiDict[rndKey];
+                template.Letter = rndKey;
+                template.Name = rndKey;
+                retVal = new CoolImage(template.Fill.Clone(), emoji, template.Name, template.Color);
 
-            if (template.Letter.Length == 1 && Char.IsLetterOrDigit(template.Letter[0]))
+            }
+            else if (template.Letter.Length == 1 && Char.IsLetterOrDigit(template.Letter[0]))
             {
                 retVal = new CoolLetter(template.Fill.Clone(), template.Letter[0]);
             }

@@ -13,13 +13,24 @@ namespace BabySmash
 {
      class ThreadedSpeak
     {
+        private static InstalledVoice neededVoice = null;
+
         private string Word = null;
         SpeechSynthesizer SpeechSynth = new SpeechSynthesizer();
         public ThreadedSpeak(string Word)
         {
             this.Word = Word;
-            CultureInfo keyboardLanguage = System.Windows.Forms.InputLanguage.CurrentInputLanguage.Culture;
-            InstalledVoice neededVoice = this.SpeechSynth.GetInstalledVoices(keyboardLanguage).LastOrDefault();
+            if (neededVoice == null)
+            {
+                CultureInfo keyboardLanguage = System.Windows.Forms.InputLanguage.CurrentInputLanguage.Culture;
+                neededVoice = null;
+                neededVoice = this.SpeechSynth.GetInstalledVoices(keyboardLanguage).Where(i => i.VoiceInfo.Name == Properties.Settings.Default.KeyboardName).FirstOrDefault();
+                if (neededVoice == null)
+                {
+                    neededVoice = this.SpeechSynth.GetInstalledVoices(keyboardLanguage).LastOrDefault();
+                }
+            }
+
             if (neededVoice == null)
             {
                 //http://superuser.com/questions/590779/how-to-install-more-voices-to-windows-speech
@@ -62,8 +73,8 @@ namespace BabySmash
                 System.Diagnostics.Debug.WriteLine(freqHz);
                 
                 SpeechSynth.Speak(pb1);
-                System.IO.MemoryStream ms = new System.IO.MemoryStream();
-                SpeechSynth.SetOutputToWaveStream(ms);
+                //System.IO.MemoryStream ms = new System.IO.MemoryStream();
+                //SpeechSynth.SetOutputToWaveStream(ms);
                 //Mike.Rules.PitchShifter.PitchShift(pitch.Freq,,44600,ms.)
             }
             catch (Exception e)

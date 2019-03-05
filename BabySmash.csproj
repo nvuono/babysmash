@@ -75,6 +75,9 @@
     <Compile Include="Music\Note.cs" />
     <Compile Include="Music\Pitch.cs" />
     <Compile Include="Shapes\BabySmashShape.cs" />
+    <Compile Include="Shapes\CoolEmoji.xaml.cs">
+      <DependentUpon>CoolEmoji.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Shapes\CoolImage.xaml.cs">
       <DependentUpon>CoolImage.xaml</DependentUpon>
     </Compile>
@@ -126,6 +129,10 @@
     <Page Include="Shapes\CoolCircle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Shapes\CoolEmoji.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Shapes\CoolHeart.xaml">
       <Generator>MSBuild:Compile</Generator>
