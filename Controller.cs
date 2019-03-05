@@ -27,6 +27,7 @@ namespace BabySmash
 
     public class Controller
     {
+        static Random rnd = new Random(); // not thread safe but our babies will be ok
         [DllImport("user32.dll")]
         private static extern IntPtr SetFocus(IntPtr hWnd);
 
@@ -250,7 +251,11 @@ namespace BabySmash
             bool generateWordBasedOnSingleLetter = true;
             if (generateWordBasedOnSingleLetter)
             {
-                word = ImageVocab.GetWordBasedOnFirstLetter(c);
+                string imgWord = ImageVocab.GetWordBasedOnFirstLetter(c);
+                word = imgWord;
+                var emojiKvp = ImageVocab.GetKvpForEmojiBasedOnFirstLetter(c);
+
+                if (!String.IsNullOrWhiteSpace(emojiKvp.Key)) word = emojiKvp.Key;
 
                 if (String.IsNullOrWhiteSpace(word))
                 {

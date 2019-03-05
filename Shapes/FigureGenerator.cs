@@ -43,15 +43,7 @@ namespace BabySmash
             UserControl retVal = null;
             if (template.Letter=="W")
             {
-                var emojiDict = ImageVocabulary.GetEmojiImageDict();
-                //System.Collections.Generic.List<string> emojiItems = new System.Collections.Generic.List<string>()
-                //{"💣","💰","✏","🖌","🖋","✂","📌","⏰","🗑","🥨","🍩","🍪","🐷" };
-                string rndKey = emojiDict.Keys.ElementAt(rnd.Next(emojiDict.Keys.Count));
-                string emoji = emojiDict[rndKey];
-                template.Letter = rndKey;
-                template.Name = rndKey;
-                retVal = new CoolImage(template.Fill.Clone(), emoji, template.Name, template.Color);
-
+                
             }
             else if (template.Letter.Length == 1 && Char.IsLetterOrDigit(template.Letter[0]))
             {
@@ -59,7 +51,9 @@ namespace BabySmash
             }
             else if (Char.IsLetterOrDigit(template.Letter[0]))
             {
-                retVal = new CoolImage(template.Fill.Clone(), template.Letter[0], template.Name, template.Color);
+                // create a CoolImage based on a provided image in the ImageDictionary
+                    retVal = new CoolImage(template.Fill.Clone(), template.Letter, template.Color);
+                    //retVal = new CoolImage(template.Fill.Clone(), template.Name, template.Color);
             }
             else
             {
