@@ -1,3 +1,5 @@
+BabySmash
+=========
 ##updates by nvuono
 Expanded on usage of vocabulary words:
 * When a letter is pressed, we do some vocabulary lookups to see if we have an image that starts with that letter
@@ -18,10 +20,8 @@ The thought is that there would be a "demand" which would encapsulate several ty
  * spelling a word based only on the image and speech
 
  Added some musical framework for possibly doing something like singing the A-B-C song but the text-to-speech engine is really picky about the prosody rate values for built-in voices so I'm not sure if that will go anywhere.
- 
-=========
-BabySmash
-=========
+
+original doc continued below
 
 ## Overview
 The BabySmash game for small kids.  
