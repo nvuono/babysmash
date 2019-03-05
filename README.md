@@ -1,6 +1,6 @@
 BabySmash
 =========
-##updates by nvuono
+## updates by nvuono
 Expanded on usage of vocabulary words:
 * When a letter is pressed, we do some vocabulary lookups to see if we have an image that starts with that letter
 * pressing A brings up an acorn, D brings up a dog, etc
