@@ -7,9 +7,9 @@ Expanded on usage of vocabulary words:
 
 Added a couple methods of pulling in images to support vocabulary:
 * Easiest method is using emoji based on the Windows 8 segoe UI emoji availability. This just renders the black and white emojis but that's fine for our purposes.
-* Second method allows a png to be loaded from a Vocabulary.zip file where the filename. 
+* Second method allows a png to be loaded from a Vocabulary.zip file where the filename is simply the name of the vocabulary word like "dog.png" 
 
-Images have a color applied to them the same way that other letters and shapes get a color:
+Images have a color applied to them like how all other letters and shapes get a color:
 * We do a basic RGB threshold calculation for every pixel to "leave it blank" or force it to the selected color
 
 Started framework for adding some kind of basic game functions to match what you might find in little toy laptops, speak-n-spell, etc.
