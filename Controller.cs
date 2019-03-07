@@ -341,74 +341,14 @@ namespace BabySmash
 
         private static void PianoControl(char c)
         {
-            string pitchString = "";
-            switch (c)
+            Dictionary<char, string> keyboardPianoMap = new Dictionary<char, string>()
             {
-                case 'A':
-                    pitchString = "A3";
-                    break;
-                case 'S':
-                    pitchString = "B3";
-                    break;
-                case 'D':
-                    pitchString = "C4";
-                    break;
-                case 'F':
-                    pitchString = "D4";
-                    break;
-                case 'G':
-                    pitchString = "E4";
-                    break;
-                case 'H':
-                    pitchString = "F4";
-                    break;
-                case 'J':
-                    pitchString = "G4";
-                    break;
-                case 'K':
-                    pitchString = "A4";
-                    break;
-                case 'L':
-                    pitchString = "B4";
-                    break;
-                case ';':
-                    pitchString = "C5";
-                    break;
-                case '\'':
-                    pitchString = "D5";
-                    break;
-                case 'Q':
-                    pitchString = "Gs3";
-                    break;
-                case 'W':
-                    pitchString = "As3";
-                    break;
-                case 'R':
-                    pitchString = "Cs4";
-                    break;
-                case 'T':
-                    pitchString = "Ds4";
-                    break;
-                case 'U':
-                    pitchString = "Fs4";
-                    break;
-                case 'I':
-                    pitchString = "Gs4";
-                    break;
-                case 'O':
-                    pitchString = "As4";
-                    break;
-                case '[':
-                    pitchString = "Cs5";
-                    break;
-                case ']':
-                    pitchString = "Ds5";
-                    break;
-            }
-            if (!String.IsNullOrWhiteSpace(pitchString))
+              {'Q',"Gs3" }, {'W',"As3" },             {'R',"Cs4" }, {'T',"Ds4" },          {'U',"Fs4" }, {'I',"Gs4" }, {'O',"As4" },         {'[',"Cs5" }, {']',"Ds5" },
+                    { 'A',"A3" }, {'S',"B3" }, {'D',"C4" }, {'F',"D4" }, {'G',"E4" }, {'H',"F4" }, {'J',"G4" }, {'K',"A4" }, {'L',"B4" }, {';',"C5" }, {'\'',"D5" }
+            };
+            if (keyboardPianoMap.ContainsKey(c))
             {
-                Music.Synth.WaveTypes waveType = Music.Synth.WaveTypes.Triangle;
-                BabySmash.Music.Synth.BeepBeepWave(300, (Music.Pitch.StringToPitch[pitchString].Freq), 500, Properties.Settings.Default.WaveSynthType);
+                BabySmash.Music.Synth.BeepBeepWave(300, (Music.Pitch.StringToPitch[keyboardPianoMap[c]].Freq), 500, Properties.Settings.Default.WaveSynthType);
             }
         }
 
