@@ -36,7 +36,7 @@ namespace BabySmash
 
     public class Controller
     {
-        ControlModes ControlMode = ControlModes.Piano;
+        ControlModes ControlMode = ControlModes.LetterToWord; //ControlModes.Piano;
         static Random rnd = new Random(); // not thread safe but our babies will be ok
         [DllImport("user32.dll")]
         private static extern IntPtr SetFocus(IntPtr hWnd);
@@ -261,6 +261,10 @@ namespace BabySmash
         }
 
 
+        private void AddChart(FrameworkElement uie, char c)
+        {
+
+        }
 
         private void AddFigure(FrameworkElement uie, char c)
         {

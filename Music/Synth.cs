@@ -5,6 +5,8 @@ using System.Linq;
 using System.Media;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace BabySmash.Music
 {
@@ -175,7 +177,78 @@ namespace BabySmash.Music
                         SP.Play();
                     }
                 }
+            }//memorystream
+        }//end function
+
+        /// <summary>
+        /// Generate a graph based on critical points for visualization
+        /// </summary>
+        /// <param name="iHeight"></param>
+        /// <param name="iWidth"></param>
+        /// <returns></returns>
+        public static BitmapFrame generateGraph(int iHeight, int iWidth)
+        {
+            double scaledWidth = iWidth - 40; // should probably figure out why this doesn't work when i try to render to the full 180 width
+            double scaledHeight = iHeight - 40; // scale height by the same amount even though I had no issues with Y axis
+            
+            //ADSR envelope graph
+            List<Tuple<double, double>> inVals = new List<Tuple<double, double>>()
+            {
+                new Tuple<double,double>(0,0.0048667),
+                new Tuple<double,double>(0.208496, 0.859164),
+                new Tuple<double,double>(0.313134, 0.574462),
+                new Tuple<double,double>(0.66992, 0.563392),
+                new Tuple<double,double>(1, 0.0168068)
+            };
+
+            //WaveTable graph
+            inVals = new List<Tuple<double, double>>()
+            {
+                new Tuple<double,double>(0, 0.556951), new Tuple<double,double>(0.02265, 0.605547),
+                new Tuple<double,double>(0.0574, 0.663995), new Tuple<double,double>(0.087207, 0.710288),
+                new Tuple<double,double>(0.11692, 0.742053), new Tuple<double,double>(0.163816, 0.761877),
+                new Tuple<double,double>(0.20325, 0.767102), new Tuple<double,double>(0.240055, 0.738403),
+                new Tuple<double,double>(0.257094, 0.697406), new Tuple<double,double>(0.293672, 0.622699),
+                new Tuple<double,double>(0.327572, 0.504384), new Tuple<double,double>(0.332212, 0.446317),
+                new Tuple<double,double>(0.371193, 0.359528), new Tuple<double,double>(0.405296, 0.282376),
+                new Tuple<double,double>(0.444516, 0.244015), new Tuple<double,double>(0.510914, 0.222866),
+                new Tuple<double,double>(0.555466, 0.266881), new Tuple<double,double>(0.609716 , 0.279513),
+                new Tuple<double,double>(0.656587, 0.294495), new Tuple<double,double>(0.691513, 0.384422),
+                new Tuple<double,double>(0.716682, 0.493624), new Tuple<double,double>(0.738993, 0.522896),
+                new Tuple<double,double>(0.768384, 0.489283), new Tuple<double,double>(0.790314, 0.441069),
+                new Tuple<double,double>(0.824298, 0.339703), new Tuple<double,double>(0.851118, 0.284273),
+                new Tuple<double,double>(0.892933, 0.272571), new Tuple<double,double>(0.932546, 0.314117),
+                new Tuple<double,double>(0.964854, 0.372541), new Tuple<double,double>(1, 0.469684)
+            };
+
+            BitmapFrame frame;
+            
+            DrawingVisual drawingVisual = new DrawingVisual();
+            DrawingContext drawingContext = drawingVisual.RenderOpen();
+            drawingContext.DrawLine(new Pen(Brushes.Red,1), new System.Windows.Point(0, 0), new System.Windows.Point(scaledWidth, 0));
+            drawingContext.DrawLine(new Pen(Brushes.Red, 1), new System.Windows.Point(0, 0), new System.Windows.Point(0, scaledHeight));
+            drawingContext.DrawLine(new Pen(Brushes.Red, 1), new System.Windows.Point(scaledWidth, scaledHeight), new System.Windows.Point(scaledWidth, 0));
+            drawingContext.DrawLine(new Pen(Brushes.Red, 1), new System.Windows.Point(scaledWidth, scaledHeight), new System.Windows.Point(0, scaledHeight));
+            for (int i = 0; i < inVals.Count-1; i++)
+            {
+                double startX = inVals[i].Item1 * scaledWidth;
+                double startY = scaledHeight - (inVals[i].Item2 * scaledHeight);
+                double endX = inVals[i+1].Item1 * scaledWidth;
+                double endY = scaledHeight - (inVals[i+1].Item2 * scaledHeight);
+
+                drawingContext.DrawLine(new Pen(Brushes.Green, 1), new System.Windows.Point(startX, startY), new System.Windows.Point(endX, endY));
             }
+
+            drawingContext.Close();
+            // heigh width 180  by default
+            RenderTargetBitmap bmp = new RenderTargetBitmap(iHeight, iWidth, 120, 96, PixelFormats.Pbgra32);
+            bmp.Render(drawingVisual);
+
+            var bitmapEncoder = new PngBitmapEncoder();
+            bitmapEncoder.Frames.Add(BitmapFrame.Create(bmp));
+            frame = bitmapEncoder.Frames[0];
+            return frame;
+
         }
     }
 }

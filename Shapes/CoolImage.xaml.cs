@@ -27,21 +27,54 @@ namespace BabySmash
         {
             this.InitializeComponent();
         }
-        
+
+        /// <summary>
+        /// Given a word, perform a vocabulary lookup and find/generated associated image then colorize and render to WPF image field
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="itemName"></param>
+        /// <param name="templateColor"></param>
         public CoolImage(System.Windows.Media.Brush x, string itemName, System.Windows.Media.Color templateColor) : this()
         {
             // store copy of parameters used to generate this image
             vocabularyImage = Controller.ImageVocab.GetVocabularyImageForWord(itemName);
+            if (vocabularyImage != null)
+            {
+                processImage(x, vocabularyImage, templateColor);
+            }
+            else
+            {
+                // if no bitmapFrame then fallback to just drawing a letter
+                this.Character = itemName[0];
+                this.letterPath.Fill = x;
+
+                this.letterPath.Data = MakeCharacterGeometry(GetLetterCharacter(itemName[0]));
+                this.Width = this.letterPath.Data.Bounds.Width + this.letterPath.Data.Bounds.X + this.letterPath.StrokeThickness / 2;
+                this.Height = this.letterPath.Data.Bounds.Height + this.letterPath.Data.Bounds.Y + this.letterPath.StrokeThickness / 2;
+            }
+        }
+
+
+        /// <summary>
+        /// Colorize and setup image for final WPF rendering
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="vocabularyImage"></param>
+        /// <param name="templateColor"></param>
+        void processImage(System.Windows.Media.Brush x, VocabularyImage vocabularyImage, System.Windows.Media.Color templateColor)
+        {
+            // store copy of parameters used to generate this image
             imageColor = templateColor;
 
             BitmapFrame bitmapFrame = null; // used for colorizing and ultimately drawing to screen
-            
-            if (vocabularyImage.ImageBytes!=null) { 
-                Stream imageStream = new MemoryStream(vocabularyImage.ImageBytes);
+
+            if (vocabularyImage.ImageBytes != null)
+            {
+                Stream imageStream = new MemoryStream(vocabularyImage.ImageBytes); // imagebytes expected to be in Pbgra32 or Rgba64
                 PngBitmapDecoder decoder = new PngBitmapDecoder(imageStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
                 bitmapFrame = decoder.Frames[0];
             }
-            else if (vocabularyImage.EmojiChar!=null)
+            else if (vocabularyImage.EmojiChar != null)
             {
                 bitmapFrame = GetBitmapFrameForEmoji(vocabularyImage.EmojiChar);
             }
@@ -60,18 +93,26 @@ namespace BabySmash
                 wBmp.WritePixels(new Int32Rect(0, 0, iWidth, iHeight), iPixel, stride, 0);
                 MyImage.Source = wBmp;
             }
-            else
-            {
-                // if no bitmapFrame then fallback to just drawing a letter
-                this.Character = itemName[0];
-                this.letterPath.Fill = x;
 
-                this.letterPath.Data = MakeCharacterGeometry(GetLetterCharacter(itemName[0]));
-                this.Width = this.letterPath.Data.Bounds.Width + this.letterPath.Data.Bounds.X + this.letterPath.StrokeThickness / 2;
-                this.Height = this.letterPath.Data.Bounds.Height + this.letterPath.Data.Bounds.Y + this.letterPath.StrokeThickness / 2;
-            }
         }
 
+        /// <summary>
+        /// Directly pass a vocabularyImage (emoji or png) to create and colorize
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="vocabularyImage"></param>
+        /// <param name="templateColor"></param>
+        public CoolImage(System.Windows.Media.Brush x, VocabularyImage vocabularyImage, System.Windows.Media.Color templateColor) : this()
+        {
+            if (vocabularyImage == null) throw new ArgumentNullException("null vocabulary image");
+            this.processImage(x, vocabularyImage, templateColor);
+        }
+
+        /// <summary>
+        /// Renders a given emoji string to a bitmap image and returns for further processing
+        /// </summary>
+        /// <param name="emojiString"></param>
+        /// <returns></returns>
         private BitmapFrame GetBitmapFrameForEmoji(string emojiString)
         {
             BitmapFrame frame;
@@ -141,7 +182,7 @@ namespace BabySmash
                         iPixel[i + 0] = (byte)(templateColor.ScB * 255);
                         iPixel[i + 1] = (byte)(templateColor.ScG * 255);
                         iPixel[i + 2] = (byte)(templateColor.ScR * 255);
-                        iPixel[i + 3] = (byte)(templateColor.ScA * 255); ;
+                        iPixel[i + 3] = (byte)(templateColor.ScA * 255);
                     }
                 }
             }

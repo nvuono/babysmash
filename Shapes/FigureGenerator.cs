@@ -38,14 +38,21 @@ namespace BabySmash
                      new KeyValuePair<BabySmashShape, BrushControlFunc>(BabySmashShape.Heart, x => new CoolHeart(x) )
              };
 
-        public static UserControl NewUserControlFrom(FigureTemplate template)
+        public static UserControl NewUserControlFrom(FigureTemplate template, VocabularyImage img)
         {
             UserControl retVal = null;
-            if (template.Letter=="W")
-            {
-                
-            }
-            else if (template.Letter.Length == 1 && Char.IsLetterOrDigit(template.Letter[0]))
+            
+            // create a CoolImage based on a provided image in the ImageDictionary
+            retVal = new CoolImage(template.Fill.Clone(), template.Letter, template.Color);
+            
+            return retVal;
+        }
+
+            public static UserControl NewUserControlFrom(FigureTemplate template)
+        {
+            UserControl retVal = null;
+
+            if (template.Letter.Length == 1 && Char.IsLetterOrDigit(template.Letter[0]))
             {
                 retVal = new CoolLetter(template.Fill.Clone(), template.Letter[0]);
             }
@@ -53,7 +60,6 @@ namespace BabySmash
             {
                 // create a CoolImage based on a provided image in the ImageDictionary
                     retVal = new CoolImage(template.Fill.Clone(), template.Letter, template.Color);
-                    //retVal = new CoolImage(template.Fill.Clone(), template.Name, template.Color);
             }
             else
             {
