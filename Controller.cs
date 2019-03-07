@@ -644,29 +644,28 @@ namespace BabySmash
             List<Tuple<double, double>> inVals = new List<Tuple<double, double>>()
             {
                 new Tuple<double,double>(0,0.0048667),
-                new Tuple<double,double>(427.274, 0.859164),
-                new Tuple<double,double>(641.308, 0.574462),
-                new Tuple<double,double>(1372.63, 0.563392),
-                new Tuple<double,double>(2048, 0.0168068)
+                new Tuple<double,double>(0.208496, 0.859164),
+                new Tuple<double,double>(0.313134, 0.574462),
+                new Tuple<double,double>(0.66992, 0.563392),
+                new Tuple<double,double>(1, 0.0168068)
             };
 
-            return LinearExpandSampleTable(inVals);
+            return LinearExpandSampleTable(inVals,2048);
         }
 
         /// <summary>
         /// Given a list of critical points, will expand the set of samples using linear interpolation to fill the given window.
         /// Expect critical point sample indices to be in increasing order
-        /// Final critical point tuple should have a sample number of [totalSamples -1] e.g. 2047 for a totalSample size of 2048
+        /// x and y coordinate inputs should be normalized to a 0.0 to 1.0 range
         /// </summary>
         /// <param name="criticalPointList"></param>
         /// <returns></returns>
-        public static double[] LinearExpandSampleTable(List<Tuple<double, double>> criticalPointList)
+        public static double[] LinearExpandSampleTable(List<Tuple<double, double>> criticalPointList, int totalSamples)
         {
-            int totalSamples = 2048;
             double[] wavetable = new double[totalSamples];
             int tupleNum = 0;
 
-            double deltaSamples = criticalPointList[tupleNum + 1].Item1 - criticalPointList[tupleNum].Item1;
+            double deltaSamples = totalSamples * (criticalPointList[tupleNum + 1].Item1 - criticalPointList[tupleNum].Item1);
             double deltaMagnitude = criticalPointList[tupleNum + 1].Item2 - criticalPointList[tupleNum].Item2;
             double startingMagnitude = criticalPointList[tupleNum].Item2;
             double dY = deltaMagnitude / deltaSamples;
@@ -675,10 +674,10 @@ namespace BabySmash
             for (int i = 0; i < totalSamples; i++)
             {
                 wavetable[i] = magnitude;
-                if (i >= criticalPointList[tupleNum + 1].Item1)
+                if (i >= totalSamples * criticalPointList[tupleNum + 1].Item1)
                 {
                     tupleNum++;
-                    dY = (criticalPointList[tupleNum + 1].Item2 - criticalPointList[tupleNum].Item2) / (criticalPointList[tupleNum + 1].Item1 - criticalPointList[tupleNum].Item1);
+                    dY = (criticalPointList[tupleNum + 1].Item2 - criticalPointList[tupleNum].Item2) / (totalSamples*(criticalPointList[tupleNum + 1].Item1 - criticalPointList[tupleNum].Item1));
                     magnitude = criticalPointList[tupleNum].Item2;
                 }
                 else
@@ -694,38 +693,24 @@ namespace BabySmash
             // sample#, magnitude (0 to 1)
             List<Tuple<double, double>> inVals = new List<Tuple<double, double>>()
             {
-                new Tuple<double,double>(0, 0.556951),
-                new Tuple<double,double>(46.3906, 0.605547),
-                new Tuple<double,double>(117.601, 0.663995),
-                new Tuple<double,double>(178.6, 0.710288),
-                new Tuple<double,double>(239.452, 0.742053),
-                new Tuple<double,double>(335.495, 0.761877),
-                new Tuple<double,double>(416.257, 0.767102),
-                new Tuple<double,double>(491.632, 0.738403),
-                new Tuple<double,double>(526.529, 0.697406),
-                new Tuple<double,double>(601.44, 0.622699),
-                new Tuple<double,double>(670.867, 0.504384),
-                new Tuple<double,double>(680.37, 0.446317),
-                new Tuple<double,double>(760.204, 0.359528),
-                new Tuple<double,double>(830.046, 0.282376),
-                new Tuple<double,double>(910.369, 0.244015),
-                new Tuple<double,double>(1046.35, 0.222866),
-                new Tuple<double,double>(1137.59, 0.266881),
-                new Tuple<double,double>(1248.7, 0.279513),
-                new Tuple<double,double>(1344.69, 0.294495),
-                new Tuple<double,double>(1416.22, 0.384422),
-                new Tuple<double,double>(1467.76, 0.493624),
-                new Tuple<double,double>(1513.46, 0.522896),
-                new Tuple<double,double>(1573.65, 0.489283),
-                new Tuple<double,double>(1618.56, 0.441069),
-                new Tuple<double,double>(1688.16, 0.339703),
-                new Tuple<double,double>(1743.09, 0.284273),
-                new Tuple<double,double>(1828.73, 0.272571),
-                new Tuple<double,double>(1909.85, 0.314117),
-                new Tuple<double,double>(1976.02, 0.372541),
-                new Tuple<double,double>(2048, 0.469684),
+                new Tuple<double,double>(0, 0.556951), new Tuple<double,double>(0.02265, 0.605547),
+                new Tuple<double,double>(0.0574, 0.663995), new Tuple<double,double>(0.087207, 0.710288),
+                new Tuple<double,double>(0.11692, 0.742053), new Tuple<double,double>(0.163816, 0.761877),
+                new Tuple<double,double>(0.20325, 0.767102), new Tuple<double,double>(0.240055, 0.738403),
+                new Tuple<double,double>(0.257094, 0.697406), new Tuple<double,double>(0.293672, 0.622699),
+                new Tuple<double,double>(0.327572, 0.504384), new Tuple<double,double>(0.332212, 0.446317),
+                new Tuple<double,double>(0.371193, 0.359528), new Tuple<double,double>(0.405296, 0.282376),
+                new Tuple<double,double>(0.444516, 0.244015), new Tuple<double,double>(0.510914, 0.222866),
+                new Tuple<double,double>(0.555466, 0.266881), new Tuple<double,double>(0.609716 , 0.279513),
+                new Tuple<double,double>(0.656587, 0.294495), new Tuple<double,double>(0.691513, 0.384422),
+                new Tuple<double,double>(0.716682, 0.493624), new Tuple<double,double>(0.738993, 0.522896),
+                new Tuple<double,double>(0.768384, 0.489283), new Tuple<double,double>(0.790314, 0.441069),
+                new Tuple<double,double>(0.824298, 0.339703), new Tuple<double,double>(0.851118, 0.284273),
+                new Tuple<double,double>(0.892933, 0.272571), new Tuple<double,double>(0.932546, 0.314117),
+                new Tuple<double,double>(0.964854, 0.372541), new Tuple<double,double>(1, 0.469684),
             };
-            return LinearExpandSampleTable(inVals);
+            return LinearExpandSampleTable(inVals,2048);
+            
         }
 
         public static void BeepBeepWave(int Amplitude, double Frequency, int Duration, int Square=0)
