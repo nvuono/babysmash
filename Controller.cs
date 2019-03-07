@@ -653,6 +653,13 @@ namespace BabySmash
             return LinearExpandSampleTable(inVals);
         }
 
+        /// <summary>
+        /// Given a list of critical points, will expand the set of samples using linear interpolation to fill the given window.
+        /// Expect critical point sample indices to be in increasing order
+        /// Final critical point tuple should have a sample number of [totalSamples -1] e.g. 2047 for a totalSample size of 2048
+        /// </summary>
+        /// <param name="criticalPointList"></param>
+        /// <returns></returns>
         public static double[] LinearExpandSampleTable(List<Tuple<double, double>> criticalPointList)
         {
             int totalSamples = 2048;
@@ -716,7 +723,7 @@ namespace BabySmash
                 new Tuple<double,double>(1828.73, 0.272571),
                 new Tuple<double,double>(1909.85, 0.314117),
                 new Tuple<double,double>(1976.02, 0.372541),
-                new Tuple<double,double>(2047, 0.469684),
+                new Tuple<double,double>(2048, 0.469684),
             };
             return LinearExpandSampleTable(inVals);
         }
