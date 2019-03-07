@@ -47,7 +47,7 @@ namespace BabySmash
 
         public void Tick()
         {
-            Debug.WriteLine("Tick #" + ticksInCurrentState + " in demandController: " + controllerState);
+            //Debug.WriteLine("Tick #" + ticksInCurrentState + " in demandController: " + controllerState);
             switch (controllerState)
             {
                 case DemandState.Startup:

@@ -137,8 +137,8 @@ namespace BabySmash
                     m = new MainWindow(this)
                     {
                         WindowStartupLocation = WindowStartupLocation.Manual,
-                        Left = 10,
-                        Top = 10,
+                        Left = 800,
+                        Top = 600,
                         Width = 800,
                         Height = 600,
                         WindowStyle = WindowStyle.SingleBorderWindow,
@@ -223,9 +223,14 @@ namespace BabySmash
             }
         }
 
+        /// <summary>
+        /// Ticks every second according to interval config, grabs focus back to foreground if necessary and used for processing demand/game state changes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void timer_Tick(object sender, EventArgs e)
         {
-            Debug.WriteLine("timer_Tick");
+            //Debug.WriteLine("timer_Tick");
             if (shouldGrabFocus())
             {
                 try
@@ -264,74 +269,7 @@ namespace BabySmash
             
             if(ControlMode == ControlModes.Piano)
             {
-                string pitchString = "";
-                switch (c)
-                {
-                    case 'A':
-                        pitchString = "A3";
-                        break;
-                    case 'S':
-                        pitchString = "B3";
-                        break;
-                    case 'D':
-                        pitchString = "C4";
-                        break;
-                    case 'F':
-                        pitchString = "D4";
-                        break;
-                    case 'G':
-                        pitchString = "E4";
-                        break;
-                    case 'H':
-                        pitchString = "F4";
-                        break;
-                    case 'J':
-                        pitchString = "G4";
-                        break;
-                    case 'K':
-                        pitchString = "A4";
-                        break;
-                    case 'L':
-                        pitchString = "B4";
-                        break;
-                    case ';':
-                        pitchString = "C5";
-                        break;
-                    case '\'':
-                        pitchString = "D5";
-                        break;
-                    case 'Q':
-                        pitchString = "Gs3";
-                        break;
-                    case 'W':
-                        pitchString = "As3";
-                        break;
-                    case 'R':
-                        pitchString = "Cs4";
-                        break;
-                    case 'T':
-                        pitchString = "Ds4";
-                        break;
-                    case 'U':
-                        pitchString = "Fs4";
-                        break;
-                    case 'I':
-                        pitchString = "Gs4";
-                        break;
-                    case 'O':
-                        pitchString = "As4";
-                        break;
-                    case '[':
-                        pitchString = "Cs5";
-                        break;
-                    case ']':
-                        pitchString = "Ds5";
-                        break;
-                }
-                if (!String.IsNullOrWhiteSpace(pitchString))
-                {
-                    BeepBeep(300, (Music.Pitch.StringToPitch[pitchString].Freq), 500);
-                }
+                PianoControl(c);
             }
             if (ControlMode == ControlModes.LetterToWord)
             {
@@ -349,32 +287,34 @@ namespace BabySmash
             foreach (MainWindow window in this.windows)
             {
                 UserControl f = FigureGenerator.NewUserControlFrom(template);
-                window.AddFigure(f);
-
                 var queue = figuresUserControlQueue[window.Name];
-                queue.Add(f);
 
-                // Letters should already have accurate width and height, but others may them assigned.
-                if (double.IsNaN(f.Width) || double.IsNaN(f.Height))
+                if (f != null)
                 {
-                    f.Width = 300;
-                    f.Height = 300;
+                    window.AddFigure(f);
+                    queue.Add(f);
+
+                    // Letters should already have accurate width and height, but others may them assigned.
+                    if (double.IsNaN(f.Width) || double.IsNaN(f.Height))
+                    {
+                        f.Width = 300;
+                        f.Height = 300;
+                    }
+
+                    Canvas.SetLeft(f, Utils.RandomBetweenTwoNumbers(0, Convert.ToInt32(window.ActualWidth - f.Width)));
+                    Canvas.SetTop(f, Utils.RandomBetweenTwoNumbers(0, Convert.ToInt32(window.ActualHeight - f.Height)));
+
+                    Storyboard storyboard = Animation.CreateDPAnimation(uie, f,
+                                    UIElement.OpacityProperty,
+                                    new Duration(TimeSpan.FromSeconds(Settings.Default.FadeAfter)), 1, 0);
+                    if (Settings.Default.FadeAway) storyboard.Begin(uie);
+
+                    IHasFace face = f as IHasFace;
+                    if (face != null)
+                    {
+                        face.FaceVisible = Settings.Default.FacesOnShapes ? Visibility.Visible : Visibility.Hidden;
+                    }
                 }
-
-                Canvas.SetLeft(f, Utils.RandomBetweenTwoNumbers(0, Convert.ToInt32(window.ActualWidth - f.Width)));
-                Canvas.SetTop(f, Utils.RandomBetweenTwoNumbers(0, Convert.ToInt32(window.ActualHeight - f.Height)));
-
-                Storyboard storyboard = Animation.CreateDPAnimation(uie, f,
-                                UIElement.OpacityProperty,
-                                new Duration(TimeSpan.FromSeconds(Settings.Default.FadeAfter)), 1, 0);
-                if (Settings.Default.FadeAway) storyboard.Begin(uie);
-
-                IHasFace face = f as IHasFace;
-                if (face != null)
-                {
-                    face.FaceVisible = Settings.Default.FacesOnShapes ? Visibility.Visible : Visibility.Hidden;
-                }
-
                 if (queue.Count > Settings.Default.ClearAfter)
                 {
                     window.RemoveFigure(queue[0]);
@@ -399,31 +339,77 @@ namespace BabySmash
             }
         }
 
-        //private static DoubleAnimationUsingKeyFrames ApplyZoomOut(UserControl u)
-        //{
-        //   Tweener.TransitionType rt1 = Tweener.TransitionType.EaseOutExpo;
-        //   var ani1 = Tweener.Tween.CreateAnimation(rt1, 1, 0, TimeSpan.FromSeconds(0.5));
-        //   u.RenderTransformOrigin = new Point(0.5, 0.5);
-        //   var group = new TransformGroup();
-        //   u.RenderTransform = group;
-
-        //   ani1.Completed += new EventHandler(ani1_Completed); 
-
-        //   group.Children.Add(new ScaleTransform());
-        //   group.Children[0].BeginAnimation(ScaleTransform.ScaleXProperty, ani1);
-        //   group.Children[0].BeginAnimation(ScaleTransform.ScaleYProperty, ani1);
-        //   return ani1;
-        //}
-
-        //static void ani1_Completed(object sender, EventArgs e)
-        //{
-        //   AnimationClock clock = sender as AnimationClock;
-        //   Debug.Write(sender.ToString());
-        //   UserControl foo = sender as UserControl;
-        //   UserControl toBeRemoved = queue.Dequeue() as UserControl;
-        //   Canvas container = toBeRemoved.Parent as Canvas;
-        //   container.Children.Remove(toBeRemoved);
-        //}
+        private static void PianoControl(char c)
+        {
+            string pitchString = "";
+            switch (c)
+            {
+                case 'A':
+                    pitchString = "A3";
+                    break;
+                case 'S':
+                    pitchString = "B3";
+                    break;
+                case 'D':
+                    pitchString = "C4";
+                    break;
+                case 'F':
+                    pitchString = "D4";
+                    break;
+                case 'G':
+                    pitchString = "E4";
+                    break;
+                case 'H':
+                    pitchString = "F4";
+                    break;
+                case 'J':
+                    pitchString = "G4";
+                    break;
+                case 'K':
+                    pitchString = "A4";
+                    break;
+                case 'L':
+                    pitchString = "B4";
+                    break;
+                case ';':
+                    pitchString = "C5";
+                    break;
+                case '\'':
+                    pitchString = "D5";
+                    break;
+                case 'Q':
+                    pitchString = "Gs3";
+                    break;
+                case 'W':
+                    pitchString = "As3";
+                    break;
+                case 'R':
+                    pitchString = "Cs4";
+                    break;
+                case 'T':
+                    pitchString = "Ds4";
+                    break;
+                case 'U':
+                    pitchString = "Fs4";
+                    break;
+                case 'I':
+                    pitchString = "Gs4";
+                    break;
+                case 'O':
+                    pitchString = "As4";
+                    break;
+                case '[':
+                    pitchString = "Cs5";
+                    break;
+                case ']':
+                    pitchString = "Ds5";
+                    break;
+            }
+            if (!String.IsNullOrWhiteSpace(pitchString))
+            {
+                BeepBeepWave(300, (Music.Pitch.StringToPitch[pitchString].Freq), 500,0);
+            }
+        }
 
         void HandleMouseWheel(object sender, MouseWheelEventArgs e)
         {
@@ -649,11 +635,145 @@ namespace BabySmash
             if (isDrawing) isDrawing = false;
         }
 
+        public static double[] WaveTable = CreateWavetable();
+        public static double[] AsdrTable = CreateAsdrEnvelope();
+
+        public static double[] CreateAsdrEnvelope()
+        {
+            // sample#, magnitude (0 to 1)
+            List<Tuple<double, double>> inVals = new List<Tuple<double, double>>()
+            {
+                new Tuple<double,double>(0,0.0048667),
+                new Tuple<double,double>(427.274, 0.859164),
+                new Tuple<double,double>(641.308, 0.574462),
+                new Tuple<double,double>(1372.63, 0.563392),
+                new Tuple<double,double>(2048, 0.0168068)
+            };
+
+            return LinearExpandSampleTable(inVals);
+        }
+
+        public static double[] LinearExpandSampleTable(List<Tuple<double, double>> criticalPointList)
+        {
+            int totalSamples = 2048;
+            double[] wavetable = new double[totalSamples];
+            int tupleNum = 0;
+
+            double deltaSamples = criticalPointList[tupleNum + 1].Item1 - criticalPointList[tupleNum].Item1;
+            double deltaMagnitude = criticalPointList[tupleNum + 1].Item2 - criticalPointList[tupleNum].Item2;
+            double startingMagnitude = criticalPointList[tupleNum].Item2;
+            double dY = deltaMagnitude / deltaSamples;
+            double magnitude = startingMagnitude;
+
+            for (int i = 0; i < totalSamples; i++)
+            {
+                wavetable[i] = magnitude;
+                if (i >= criticalPointList[tupleNum + 1].Item1)
+                {
+                    tupleNum++;
+                    dY = (criticalPointList[tupleNum + 1].Item2 - criticalPointList[tupleNum].Item2) / (criticalPointList[tupleNum + 1].Item1 - criticalPointList[tupleNum].Item1);
+                    magnitude = criticalPointList[tupleNum].Item2;
+                }
+                else
+                {
+                    magnitude = magnitude + dY;
+                }
+            }
+            return wavetable;
+        }
+
+        public static double[] CreateWavetable()
+        {
+            // sample#, magnitude (0 to 1)
+            List<Tuple<double, double>> inVals = new List<Tuple<double, double>>()
+            {
+                new Tuple<double,double>(0, 0.556951),
+                new Tuple<double,double>(46.3906, 0.605547),
+                new Tuple<double,double>(117.601, 0.663995),
+                new Tuple<double,double>(178.6, 0.710288),
+                new Tuple<double,double>(239.452, 0.742053),
+                new Tuple<double,double>(335.495, 0.761877),
+                new Tuple<double,double>(416.257, 0.767102),
+                new Tuple<double,double>(491.632, 0.738403),
+                new Tuple<double,double>(526.529, 0.697406),
+                new Tuple<double,double>(601.44, 0.622699),
+                new Tuple<double,double>(670.867, 0.504384),
+                new Tuple<double,double>(680.37, 0.446317),
+                new Tuple<double,double>(760.204, 0.359528),
+                new Tuple<double,double>(830.046, 0.282376),
+                new Tuple<double,double>(910.369, 0.244015),
+                new Tuple<double,double>(1046.35, 0.222866),
+                new Tuple<double,double>(1137.59, 0.266881),
+                new Tuple<double,double>(1248.7, 0.279513),
+                new Tuple<double,double>(1344.69, 0.294495),
+                new Tuple<double,double>(1416.22, 0.384422),
+                new Tuple<double,double>(1467.76, 0.493624),
+                new Tuple<double,double>(1513.46, 0.522896),
+                new Tuple<double,double>(1573.65, 0.489283),
+                new Tuple<double,double>(1618.56, 0.441069),
+                new Tuple<double,double>(1688.16, 0.339703),
+                new Tuple<double,double>(1743.09, 0.284273),
+                new Tuple<double,double>(1828.73, 0.272571),
+                new Tuple<double,double>(1909.85, 0.314117),
+                new Tuple<double,double>(1976.02, 0.372541),
+                new Tuple<double,double>(2047, 0.469684),
+            };
+            return LinearExpandSampleTable(inVals);
+        }
+
+        public static void BeepBeepWave(int Amplitude, double Frequency, int Duration, int Square=0)
+        { 
+            double A = ((Amplitude * (System.Math.Pow(2, 15))) / 1000) - 1;
+            int freqPeriod = (int)(44100 / Frequency);
+            int totalSamples = 441 * Duration / 10;
+            short Sample = 0;
+            int Bytes = totalSamples * 4;
+            int[] Hdr = { 0X46464952, 36 + Bytes, 0X45564157, 0X20746D66, 16, 0X20001, 44100, 176400, 0X100004, 0X61746164, Bytes };
+            using (MemoryStream MS = new MemoryStream(44 + Bytes))
+            {
+                using (BinaryWriter BW = new BinaryWriter(MS))
+                {
+                    for (int I = 0; I < Hdr.Length; I++)
+                    {
+                        BW.Write(Hdr[I]);
+                    }
+                    double aFreqPeriod = (A / freqPeriod);
+                    double dblSample = 0;
+                    for (int T = 0; T < totalSamples; T++)
+                    {
+                        if (Square == 0)
+                        {
+                            dblSample =(Math.Abs((T % freqPeriod)) * (aFreqPeriod)); //triangle wave
+                        }
+                        else
+                        {
+                            dblSample =((T % freqPeriod) < (aFreqPeriod /2)? A : 0); //square wave
+                        }
+                        //apply wavetable synthesis
+                        int waveTableIndex =(int) (((double)WaveTable.Length) / ((double)freqPeriod)) * (T % freqPeriod);
+                        dblSample *= WaveTable[waveTableIndex];
+                        // apply ASDR to overall waveform
+                        // index into ASDR table = total # of samples / tableLength
+                        waveTableIndex = (int) (T * (((double)AsdrTable.Length) / totalSamples));
+                        dblSample *= AsdrTable[waveTableIndex];
+                        Sample = (short)dblSample;
+                        BW.Write(Sample);
+                        BW.Write(Sample);
+                    }
+                    BW.Flush();
+                    MS.Seek(0, SeekOrigin.Begin);
+                    using (SoundPlayer SP = new SoundPlayer(MS))
+                    {
+                        SP.Play();
+                    }
+                }
+            }
+        }
+
         public static void BeepBeep(int Amplitude, double Frequency, int Duration)
         {
             double A = ((Amplitude * (System.Math.Pow(2, 15))) / 1000) - 1;
             double DeltaFT = 2 * Math.PI * Frequency / 44100.0;
-
             int Samples = 441 * Duration / 10;
             int Bytes = Samples * 4;
             int[] Hdr = { 0X46464952, 36 + Bytes, 0X45564157, 0X20746D66, 16, 0X20001, 44100, 176400, 0X100004, 0X61746164, Bytes };
@@ -667,7 +787,7 @@ namespace BabySmash
                     }
                     for (int T = 0; T < Samples; T++)
                     {
-                        short Sample = System.Convert.ToInt16(A * Math.Sin(DeltaFT * T));
+                        short Sample = System.Convert.ToInt16(A * Math.Sin(DeltaFT * T)); //sine
                         BW.Write(Sample);
                         BW.Write(Sample);
                     }
