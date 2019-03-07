@@ -69,13 +69,8 @@ namespace BabySmash
                 var pb1 = new PromptBuilder();
                 var pitch = SongProvider.song.GetNextNote().Pitch;
                 string freqHz = pitch.Freq.ToString("0") + "Hz";
-                pb1.AppendSsmlMarkup("<prosody pitch=\""+freqHz+"\" rate=\"slow\">"+Word+"</prosody >");
-                System.Diagnostics.Debug.WriteLine(freqHz);
-                
+                pb1.AppendSsmlMarkup("<prosody pitch=\""+freqHz+"\" rate=\"slow\">"+Word+"</prosody >");                
                 SpeechSynth.Speak(pb1);
-                //System.IO.MemoryStream ms = new System.IO.MemoryStream();
-                //SpeechSynth.SetOutputToWaveStream(ms);
-                //Mike.Rules.PitchShifter.PitchShift(pitch.Freq,,44600,ms.)
             }
             catch (Exception e)
             {

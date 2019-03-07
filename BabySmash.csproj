@@ -74,6 +74,7 @@
     <Compile Include="KeyControl.cs" />
     <Compile Include="Music\Note.cs" />
     <Compile Include="Music\Pitch.cs" />
+    <Compile Include="Music\Synth.cs" />
     <Compile Include="Shapes\BabySmashShape.cs" />
     <Compile Include="Shapes\CoolEmoji.xaml.cs">
       <DependentUpon>CoolEmoji.xaml</DependentUpon>

@@ -190,5 +190,17 @@ namespace BabySmash.Properties {
                 this["PlayStartupSound"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("RawWavetable")]
+        public global::BabySmash.Music.Synth.WaveTypes WaveSynthType {
+            get {
+                return ((global::BabySmash.Music.Synth.WaveTypes)(this["WaveSynthType"]));
+            }
+            set {
+                this["WaveSynthType"] = value;
+            }
+        }
     }
 }
