@@ -7,15 +7,30 @@ using System.Text;
 
 namespace BabySmash
 {
+    public enum VocabularyImageTypes
+    {
+        NONE,
+        VectorPNG,
+        Emoji,
+        INVALID
+    }
+
+    public class VocabularyImage
+    {
+        public VocabularyImageTypes ImageType { get; set; }
+        public string Name { get; set; }
+        public string Fullname { get; set; }
+        public string EmojiChar { get; set; }
+        public byte[] ImageBytes { get; set; }
+    }
+
     public class ImageVocabulary
     {
         private static Random rnd = new Random(); // not threadsafe but I think we'll be ok
 
         string _resourceFileName = "vocabulary.zip";
-        Dictionary<string, byte[]> FileNameToByteDict = new Dictionary<string, byte[]>();
-        Dictionary<string, List<string>> WordToFileNameDict = new Dictionary<string, List<string>>();
-        public static Dictionary<string, string> EmojiImageDict = GetEmojiImageDict();
-
+       public Dictionary<string, List<VocabularyImage>> ImageVocabularyDictionary { get; set; }
+       
         /// <summary>
         /// Keeps track of all vocabulary items and loads them ALL into memory
         /// I've only got a sample corpus of 1-2MB so this shouldn't be an issue for
@@ -23,6 +38,14 @@ namespace BabySmash
         /// if you wind up using a significantly larger corpus of images
         /// </summary>
         public ImageVocabulary()
+        {
+            ImageVocabularyDictionary = new Dictionary<string, List<VocabularyImage>>();
+            AddResourcePngsToDict();
+            LoadEmojiImageDict();
+
+        }
+
+        private void AddResourcePngsToDict()
         {
             using (ZipArchive za = new ZipArchive(new MemoryStream(Properties.Resources.vocabulary)))
             {
@@ -36,12 +59,17 @@ namespace BabySmash
                         byte[] buff = new byte[entry.Length];
                         stream.Read(buff, 0, (int)entry.Length);
                         string simpleName = SimplifyFileName(entry.Name);
-                        FileNameToByteDict.Add(entry.Name, buff);
-                        if (!WordToFileNameDict.ContainsKey(simpleName))
+                        if (!ImageVocabularyDictionary.ContainsKey(simpleName))
                         {
-                            WordToFileNameDict.Add(simpleName, new List<string>());
+                            ImageVocabularyDictionary.Add(simpleName, new List<VocabularyImage>());
                         }
-                        WordToFileNameDict[simpleName].Add(entry.Name);
+                        ImageVocabularyDictionary[simpleName].Add(new VocabularyImage()
+                        {
+                            ImageType = VocabularyImageTypes.VectorPNG,
+                            Name = simpleName,
+                            Fullname = entry.Name,
+                            ImageBytes = buff
+                        });
                     }
                 }
             }
@@ -67,41 +95,37 @@ namespace BabySmash
             return returnString;
         }
 
-        public  byte[] GetImageForWord(string word)
+        public VocabularyImage GetVocabularyImageForWord(string word)
+        {
+            if (ImageVocabularyDictionary.ContainsKey(word))
+            {
+                var wordEntries = ImageVocabularyDictionary[word];
+                if (wordEntries.Any())
+                {
+                    return wordEntries.ElementAt(rnd.Next(wordEntries.Count()));
+                }
+            }
+
+            return null;
+        }
+
+            public  byte[] GetImageForWord(string word)
         {
             byte[] retBytes = null;
-            if (WordToFileNameDict.ContainsKey(word) && FileNameToByteDict.ContainsKey(WordToFileNameDict[word].FirstOrDefault())){
-                var fileName = WordToFileNameDict[word].FirstOrDefault();
-                retBytes = FileNameToByteDict[fileName];
+            if (ImageVocabularyDictionary.ContainsKey(word)) {
+                var wordEntries = ImageVocabularyDictionary[word].Where(i=>i.ImageBytes!=null);
+                if (wordEntries.Any())
+                {
+                    retBytes = wordEntries.ElementAt(rnd.Next(wordEntries.Count())).ImageBytes;
+                }
             }
             return retBytes;
         }
-
-        public KeyValuePair<string,string> GetKvpForEmojiBasedOnFirstLetter(char letter)
-        {
-            var emojisStartingWithC = ImageVocabulary.EmojiImageDict.Keys.Where(i => i.ToUpperInvariant().StartsWith(letter.ToString().ToUpper()));
-            string word = "";
-            string emoji="";
-
-            if (emojisStartingWithC.Any())
-            {
-                string rndKey = emojisStartingWithC.ElementAt(rnd.Next(emojisStartingWithC.Count()));
-                if (rndKey != null)
-                {
-                    word = rndKey;
-                    if (word.IndexOf("_") > 0)
-                    {
-                        word = word.Substring(0, word.IndexOf("_"));
-                        emoji = EmojiImageDict[word];
-                    }
-                }
-            }
-            return new KeyValuePair<string, string>(word, emoji);
-        }
+        
         public string GetWordBasedOnFirstLetter(char letter)
         {
             string retWord = null;
-            var allWordsForLetter = WordToFileNameDict.Keys.Where(i => i.StartsWith(letter.ToString()));
+            var allWordsForLetter = ImageVocabularyDictionary.Keys.Where(i => i.StartsWith(letter.ToString()));
             if (allWordsForLetter.Any())
             {
                 retWord = allWordsForLetter.ElementAt(rnd.Next(allWordsForLetter.Count()));               
@@ -122,8 +146,44 @@ namespace BabySmash
             string val = strSplit[1];
             return new KeyValuePair<string, string>(key, getUnicodeString(val));
         }
+        public void LoadEmojiImageDict()
+        {
+            Dictionary<string, string> emojiDict = new Dictionary<string, string>();
+            var allLines = System.IO.File.ReadAllLines("emojivocabulary.csv");
+            for(int i = 1; i < allLines.Count(); i++)
+            {
+                try
+                {
+                    string[] strSplit = allLines[i].Split(',');
+                    string name = strSplit[0];
+                    string simplename = name.ToUpperInvariant();
+                    string hexCode = strSplit[1];
+                    string emoji = getUnicodeString(hexCode);
+                    bool include = strSplit[3] == "Y" ? true : false;
+                    if (include)
+                    {
+                        if (!ImageVocabularyDictionary.ContainsKey(simplename))
+                        {
+                            ImageVocabularyDictionary.Add(simplename, new List<VocabularyImage>());
+                        }
 
-        static Dictionary<string, string> GetEmojiImageDict()
+                        ImageVocabularyDictionary[simplename].Add(new VocabularyImage()
+                        {
+                            ImageType = VocabularyImageTypes.Emoji,
+                            Name = simplename,
+                            EmojiChar = emoji,
+                            Fullname = hexCode,
+                            ImageBytes = null
+                        });
+                    }
+                }catch(Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(String.Format("Error loading emoji line[{0}]:{1}", i, allLines[i]));
+                }
+            }
+        }
+
+        static Dictionary<string, string> GetEmojiImageDictManual()
         {
             Dictionary<string, string> emojiDict = new Dictionary<string, string>();
             List<string> includedEmojis = new List<string>()

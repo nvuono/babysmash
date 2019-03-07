@@ -253,9 +253,6 @@ namespace BabySmash
             {
                 string imgWord = ImageVocab.GetWordBasedOnFirstLetter(c);
                 word = imgWord;
-                var emojiKvp = ImageVocab.GetKvpForEmojiBasedOnFirstLetter(c);
-
-                if (!String.IsNullOrWhiteSpace(emojiKvp.Key)) word = emojiKvp.Key;
 
                 if (String.IsNullOrWhiteSpace(word))
                 {

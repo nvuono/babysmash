@@ -25,9 +25,9 @@ namespace BabySmash
         
         public CoolImage(System.Windows.Media.Brush x, string itemName, System.Windows.Media.Color templateColor) : this()
         {
-            var stream = Controller.ImageVocab.GetImageForWord(itemName);
-            if (stream != null) { 
-                Stream imageStream = new MemoryStream(stream);
+            var vocabImage = Controller.ImageVocab.GetVocabularyImageForWord(itemName);
+            if (vocabImage.ImageBytes!=null) { 
+                Stream imageStream = new MemoryStream(vocabImage.ImageBytes);
                 PngBitmapDecoder decoder = new PngBitmapDecoder(imageStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
                 BitmapSource myBitmapSource = decoder.Frames[0];
                 WriteableBitmap wBmp = new WriteableBitmap(myBitmapSource);
@@ -59,12 +59,12 @@ namespace BabySmash
                 wBmp.WritePixels(new Int32Rect(0, 0, iWidth, iHeight), iPixel, iWidth * 8, 0);
                 MyImage.Source = wBmp;
             }
-            else if (ImageVocabulary.EmojiImageDict.ContainsKey(itemName))
+            else if (vocabImage.EmojiChar!=null)
             {
                 string fontName = "Segoe UI Emoji";
                 fontName = "Segoe Color Emoji";
-                string letter = ImageVocabulary.EmojiImageDict[itemName];
-                FormattedText text = new FormattedText(letter,
+;
+                FormattedText text = new FormattedText(vocabImage.EmojiChar,
                     new CultureInfo("en-us"),
                     FlowDirection.LeftToRight,
                     new Typeface(new FontFamily(fontName), FontStyles.Normal, FontWeights.Normal, new FontStretch()),
