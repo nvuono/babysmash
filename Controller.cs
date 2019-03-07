@@ -23,10 +23,20 @@ namespace BabySmash
     using Newtonsoft.Json;
     using System.Globalization;
     using System.IO;
+    using System.Media;
     using System.Speech.Synthesis;
+
+    public enum ControlModes
+    {
+        BasicLetter,
+        LetterToWord,
+        Piano,
+        INVALID
+    }
 
     public class Controller
     {
+        ControlModes ControlMode = ControlModes.Piano;
         static Random rnd = new Random(); // not thread safe but our babies will be ok
         [DllImport("user32.dll")]
         private static extern IntPtr SetFocus(IntPtr hWnd);
@@ -122,7 +132,7 @@ namespace BabySmash
             {
                 MainWindow m = null;
 
-                                if (System.Diagnostics.Debugger.IsAttached)
+                if (System.Diagnostics.Debugger.IsAttached)
                 {
                     m = new MainWindow(this)
                     {
@@ -141,7 +151,7 @@ namespace BabySmash
                 }
                 else
                 {
-                    m= new MainWindow(this)
+                    m = new MainWindow(this)
                     {
                         WindowStartupLocation = WindowStartupLocation.Manual,
                         Left = s.WorkingArea.Left,
@@ -178,7 +188,10 @@ namespace BabySmash
             windows[0].infoLabel.Visibility = Visibility.Visible;
 
             //Startup sound
-            Win32Audio.PlayWavResourceYield("EditedJackPlaysBabySmash.wav");
+            if (Properties.Settings.Default.PlayStartupSound)
+            {
+                Win32Audio.PlayWavResourceYield("EditedJackPlaysBabySmash.wav");
+            }
 
             string[] args = Environment.GetCommandLineArgs();
             string ext = System.IO.Path.GetExtension(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
@@ -200,7 +213,7 @@ namespace BabySmash
         /// <returns></returns>
         bool shouldGrabFocus()
         {
-            if(System.Diagnostics.Debugger.IsAttached || isOptionsDialogShown)
+            if (System.Diagnostics.Debugger.IsAttached || isOptionsDialogShown)
             {
                 return false;
             }
@@ -237,7 +250,7 @@ namespace BabySmash
             {
                 uie.ReleaseMouseCapture();
             }
-            
+
             char displayChar = KeyControl.GetDisplayChar(e.Key);
             AddFigure(uie, displayChar);
         }
@@ -248,8 +261,79 @@ namespace BabySmash
         {
             string word = c.ToString();
             FigureTemplate template = null;
-            bool generateWordBasedOnSingleLetter = true;
-            if (generateWordBasedOnSingleLetter)
+            
+            if(ControlMode == ControlModes.Piano)
+            {
+                string pitchString = "";
+                switch (c)
+                {
+                    case 'A':
+                        pitchString = "A3";
+                        break;
+                    case 'S':
+                        pitchString = "B3";
+                        break;
+                    case 'D':
+                        pitchString = "C4";
+                        break;
+                    case 'F':
+                        pitchString = "D4";
+                        break;
+                    case 'G':
+                        pitchString = "E4";
+                        break;
+                    case 'H':
+                        pitchString = "F4";
+                        break;
+                    case 'J':
+                        pitchString = "G4";
+                        break;
+                    case 'K':
+                        pitchString = "A4";
+                        break;
+                    case 'L':
+                        pitchString = "B4";
+                        break;
+                    case ';':
+                        pitchString = "C5";
+                        break;
+                    case '\'':
+                        pitchString = "D5";
+                        break;
+                    case 'Q':
+                        pitchString = "Gs3";
+                        break;
+                    case 'W':
+                        pitchString = "As3";
+                        break;
+                    case 'R':
+                        pitchString = "Cs4";
+                        break;
+                    case 'T':
+                        pitchString = "Ds4";
+                        break;
+                    case 'U':
+                        pitchString = "Fs4";
+                        break;
+                    case 'I':
+                        pitchString = "Gs4";
+                        break;
+                    case 'O':
+                        pitchString = "As4";
+                        break;
+                    case '[':
+                        pitchString = "Cs5";
+                        break;
+                    case ']':
+                        pitchString = "Ds5";
+                        break;
+                }
+                if (!String.IsNullOrWhiteSpace(pitchString))
+                {
+                    BeepBeep(300, (Music.Pitch.StringToPitch[pitchString].Freq), 500);
+                }
+            }
+            if (ControlMode == ControlModes.LetterToWord)
             {
                 string imgWord = ImageVocab.GetWordBasedOnFirstLetter(c);
                 word = imgWord;
@@ -259,10 +343,10 @@ namespace BabySmash
                     word = c.ToString();
                 }
             }
-            
-                template = FigureGenerator.GenerateFigureTemplate(word);
-            
-                foreach (MainWindow window in this.windows)
+
+            template = FigureGenerator.GenerateFigureTemplate(word);
+
+            foreach (MainWindow window in this.windows)
             {
                 UserControl f = FigureGenerator.NewUserControlFrom(template);
                 window.AddFigure(f);
@@ -376,13 +460,18 @@ namespace BabySmash
             }
             if (objSpeech != null && Settings.Default.Sounds == "Speech")
             {
-                if (template.Letter != null && template.Letter.Length == 1 && Char.IsLetterOrDigit(template.Letter[0]))
+                if (ControlMode != ControlModes.Piano)
                 {
-                    SpeakString(template.Letter);
-                }
-                else
-                {
-                    SpeakString(GetLocalizedString(Utils.ColorToString(template.Color)) + " " + template.Name);
+                    if (template.Letter != null && template.Letter.Length == 1 && Char.IsLetterOrDigit(template.Letter[0]))
+                    {
+
+                        SpeakString(template.Letter);
+
+                    }
+                    else
+                    {
+                        SpeakString(GetLocalizedString(Utils.ColorToString(template.Color)) + " " + template.Name);
+                    }
                 }
             }
         }
@@ -433,7 +522,7 @@ namespace BabySmash
             ts.Speak();
         }
 
-        
+
 
         public void ShowOptionsDialog()
         {
@@ -558,6 +647,84 @@ namespace BabySmash
         {
             if (Settings.Default.MouseDraw) return;
             if (isDrawing) isDrawing = false;
+        }
+
+        public static void BeepBeep(int Amplitude, double Frequency, int Duration)
+        {
+            double A = ((Amplitude * (System.Math.Pow(2, 15))) / 1000) - 1;
+            double DeltaFT = 2 * Math.PI * Frequency / 44100.0;
+
+            int Samples = 441 * Duration / 10;
+            int Bytes = Samples * 4;
+            int[] Hdr = { 0X46464952, 36 + Bytes, 0X45564157, 0X20746D66, 16, 0X20001, 44100, 176400, 0X100004, 0X61746164, Bytes };
+            using (MemoryStream MS = new MemoryStream(44 + Bytes))
+            {
+                using (BinaryWriter BW = new BinaryWriter(MS))
+                {
+                    for (int I = 0; I < Hdr.Length; I++)
+                    {
+                        BW.Write(Hdr[I]);
+                    }
+                    for (int T = 0; T < Samples; T++)
+                    {
+                        short Sample = System.Convert.ToInt16(A * Math.Sin(DeltaFT * T));
+                        BW.Write(Sample);
+                        BW.Write(Sample);
+                    }
+                    BW.Flush();
+                    MS.Seek(0, SeekOrigin.Begin);
+                    using (SoundPlayer SP = new SoundPlayer(MS))
+                    {
+                        SP.Play();
+                    }
+                }
+            }
+        }
+
+            public void testWaveOutput(double freq)
+        {
+            //https://stackoverflow.com/a/30939615
+            //your wav streams
+            MemoryStream wavNoHeader1 = new MemoryStream();
+            BinaryWriter bw1 = new BinaryWriter(wavNoHeader1);
+
+            ushort numsamples = 64000;
+            double Vpp = 10000;
+
+            short[] xvals;
+            for (int i = 0; i < numsamples; i++)
+            {
+                double time = (double)(i / 44100.0);
+                short y1 = (short)(Vpp * (Math.Sin(freq * 2.0 * Math.PI * time)));
+                bw1.Write(y1);
+            }
+            wavNoHeader1.Position = 0;
+            //result WAV stream
+            MemoryStream wav = new MemoryStream();
+            //create & write header
+            ushort numchannels = 1;
+            ushort samplelength = 2; // in bytes
+            uint samplerate = 44100;
+            int wavsize = (int)((wavNoHeader1.Length) / (numchannels * samplelength));
+            BinaryWriter wr = new BinaryWriter(wav);
+            wr.Write(System.Text.Encoding.ASCII.GetBytes("RIFF"));
+            wr.Write(36 + wavsize);
+            wr.Write(System.Text.Encoding.ASCII.GetBytes("WAVEfmt "));
+            wr.Write(16);
+            wr.Write((ushort)1);
+            wr.Write(numchannels);
+            wr.Write(samplerate);
+            wr.Write(samplerate * samplelength * numchannels); //byterate per second
+            wr.Write(samplelength * numchannels); //blockalign
+            wr.Write((ushort)(8 * samplelength)); //bitsPerSample
+            wr.Write(System.Text.Encoding.ASCII.GetBytes("data")); //subchunk2ID
+            wr.Write(numchannels * numsamples * samplelength); //subchunk2size = NumSamples * NumChannels * BitsPerSample/8 number of bytes in the data
+            //append data from raw streams
+            wavNoHeader1.CopyTo(wav);
+            //play
+            wav.Position = 0;
+            SoundPlayer sp = new SoundPlayer(wav);
+            sp.PlaySync();
         }
     }
 }

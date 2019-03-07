@@ -15,7 +15,10 @@ namespace BabySmash
 
         public void AddFigure(UserControl c)
         {
-            this.figuresCanvas.Children.Add(c);
+            if (c != null)
+            {
+                this.figuresCanvas.Children.Add(c);
+            }
         }
 
         public void RemoveFigure(UserControl c)

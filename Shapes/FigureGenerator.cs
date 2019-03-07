@@ -64,20 +64,22 @@ namespace BabySmash
             var ani1 = Tweener.Tween.CreateAnimation(randomTransition1, 0, 1, new TimeSpan(0, 0, 0, 1), 30);
             var randomTransition2 = (Tweener.TransitionType)Utils.RandomBetweenTwoNumbers(1, (int)Tweener.TransitionType.EaseOutInBounce);
             var ani2 = Tweener.Tween.CreateAnimation(randomTransition2, 360, 0, new TimeSpan(0, 0, 0, 1), 30);
-            retVal.RenderTransformOrigin = new Point(0.5, 0.5);
-            var group = new TransformGroup();
-            group.Children.Add(new ScaleTransform());
-            group.Children.Add(new RotateTransform());
-            retVal.RenderTransform = group;
-            group.Children[0].BeginAnimation(ScaleTransform.ScaleXProperty, ani1);
-            group.Children[0].BeginAnimation(ScaleTransform.ScaleYProperty, ani1);
-            group.Children[1].BeginAnimation(RotateTransform.AngleProperty, ani2);
-
-            if (Settings.Default.BitmapEffects)
+            if (retVal != null)
             {
-                retVal.Effect = template.Effect.Clone();
-            }
+                retVal.RenderTransformOrigin = new Point(0.5, 0.5);
+                var group = new TransformGroup();
+                group.Children.Add(new ScaleTransform());
+                group.Children.Add(new RotateTransform());
+                retVal.RenderTransform = group;
+                group.Children[0].BeginAnimation(ScaleTransform.ScaleXProperty, ani1);
+                group.Children[0].BeginAnimation(ScaleTransform.ScaleYProperty, ani1);
+                group.Children[1].BeginAnimation(RotateTransform.AngleProperty, ani2);
 
+                if (Settings.Default.BitmapEffects)
+                {
+                    retVal.Effect = template.Effect.Clone();
+                }
+            }
             return retVal;
         }
 

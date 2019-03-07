@@ -178,5 +178,17 @@ namespace BabySmash.Properties {
                 this["KeyboardName"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool PlayStartupSound {
+            get {
+                return ((bool)(this["PlayStartupSound"]));
+            }
+            set {
+                this["PlayStartupSound"] = value;
+            }
+        }
     }
 }
