@@ -202,5 +202,17 @@ namespace BabySmash.Properties {
                 this["WaveSynthType"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool PianoMode {
+            get {
+                return ((bool)(this["PianoMode"]));
+            }
+            set {
+                this["PianoMode"] = value;
+            }
+        }
     }
 }

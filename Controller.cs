@@ -45,19 +45,21 @@ namespace BabySmash
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         private static Controller instance = new Controller();
-        private static DemandController demandController = new DemandController();
+        private static DemandController demandController = new DemandController(instance);
         public static ImageVocabulary ImageVocab = null;
 
         public bool isOptionsDialogShown { get; set; }
         private bool isDrawing = false;
         private readonly SpeechSynthesizer objSpeech = new SpeechSynthesizer();
-        private readonly List<MainWindow> windows = new List<MainWindow>();
+        public readonly List<MainWindow> windows = new List<MainWindow>();
 
         private DispatcherTimer timer = new DispatcherTimer();
         private Queue<Shape> ellipsesQueue = new Queue<Shape>();
         private Dictionary<string, List<UserControl>> figuresUserControlQueue = new Dictionary<string, List<UserControl>>();
         private ApplicationDeployment deployment = null;
         private WordFinder wordFinder = new WordFinder("Words.txt");
+
+        private bool pauseSpeechForDemand=false;
 
         /// <summary>Prevents a default instance of the Controller class from being created.</summary>
         private Controller() { }
@@ -249,6 +251,11 @@ namespace BabySmash
 
         }
 
+        /// <summary>
+        /// Called for every OnKeyUp
+        /// </summary>
+        /// <param name="uie"></param>
+        /// <param name="e"></param>
         public void ProcessKey(FrameworkElement uie, KeyEventArgs e)
         {
             if (uie.IsMouseCaptured)
@@ -257,6 +264,7 @@ namespace BabySmash
             }
 
             char displayChar = KeyControl.GetDisplayChar(e.Key);
+            pauseSpeechForDemand = demandController.ProcessInput(displayChar);
             AddFigure(uie, displayChar);
         }
 
@@ -271,11 +279,11 @@ namespace BabySmash
             string word = c.ToString();
             FigureTemplate template = null;
             
-            if(ControlMode == ControlModes.Piano)
+            if(Properties.Settings.Default.PianoMode)
             {
                 PianoControl(c);
             }
-            if (ControlMode == ControlModes.LetterToWord)
+            else if (ControlMode == ControlModes.LetterToWord)
             {
                 string imgWord = ImageVocab.GetWordBasedOnFirstLetter(c);
                 word = imgWord;
@@ -298,7 +306,7 @@ namespace BabySmash
                     window.AddFigure(f);
                     queue.Add(f);
 
-                    // Letters should already have accurate width and height, but others may them assigned.
+                    // Letters should already have accurate width and height, but others may need them assigned.
                     if (double.IsNaN(f.Width) || double.IsNaN(f.Height))
                     {
                         f.Width = 300;
@@ -335,11 +343,18 @@ namespace BabySmash
                     this.wordFinder.AnimateLettersIntoWord(figuresUserControlQueue[window.Name], lastWord);
                 }
 
-                SpeakString(lastWord);
+                if (!pauseSpeechForDemand)
+                {
+                    SpeakString(lastWord);
+                }
             }
             else
             {
-                PlaySound(template);
+
+                if (!pauseSpeechForDemand)
+                {
+                    PlaySound(template);
+                }
             }
         }
 
@@ -391,7 +406,7 @@ namespace BabySmash
             }
             if (objSpeech != null && Settings.Default.Sounds == "Speech")
             {
-                if (ControlMode != ControlModes.Piano)
+                if (!Properties.Settings.Default.PianoMode)
                 {
                     if (template.Letter != null && template.Letter.Length == 1 && Char.IsLetterOrDigit(template.Letter[0]))
                     {
@@ -447,7 +462,7 @@ namespace BabySmash
             Win32Audio.PlayWavResource(Utils.GetRandomSoundFile());
         }
 
-        private void SpeakString(string s)
+        public void SpeakString(string s)
         {
             ThreadedSpeak ts = new ThreadedSpeak(s);
             ts.Speak();

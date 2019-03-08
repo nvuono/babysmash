@@ -13,7 +13,7 @@ namespace BabySmash
         private UserControl customCursor;
         public UserControl CustomCursor { get { return customCursor; } set { customCursor = value; } }
 
-        public void AddFigure(UserControl c)
+        public void AddFigure(Control c)
         {
             if (c != null)
             {
@@ -21,7 +21,7 @@ namespace BabySmash
             }
         }
 
-        public void RemoveFigure(UserControl c)
+        public void RemoveFigure(Control c)
         {
             this.figuresCanvas.Children.Remove(c);
         }
