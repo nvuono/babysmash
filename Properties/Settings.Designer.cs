@@ -214,5 +214,17 @@ namespace BabySmash.Properties {
                 this["PianoMode"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool GameMode {
+            get {
+                return ((bool)(this["GameMode"]));
+            }
+            set {
+                this["GameMode"] = value;
+            }
+        }
     }
 }

@@ -105,7 +105,7 @@ namespace BabySmash
 
         void processDemandFinalSuccess(char c )
         {
-            mainController.SpeakString("Great job! You pressed " + c);
+            mainController.SpeakString("Great job, you pressed " + c);
             controllerState = DemandState.FinalSuccess;
         }
 

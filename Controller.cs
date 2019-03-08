@@ -246,8 +246,11 @@ namespace BabySmash
                     //Wish me luck!
                 }
             }
-            // process demands here
-            demandController.Tick();
+            if (Properties.Settings.Default.GameMode)
+            {
+                // process demands here if in game mode
+                demandController.Tick();
+            }
 
         }
 
@@ -264,7 +267,12 @@ namespace BabySmash
             }
 
             char displayChar = KeyControl.GetDisplayChar(e.Key);
-            pauseSpeechForDemand = demandController.ProcessInput(displayChar);
+
+            if (Properties.Settings.Default.GameMode)
+            {
+                // if we're in game mode then send the input to the demandController
+                pauseSpeechForDemand = demandController.ProcessInput(displayChar);
+            }
             AddFigure(uie, displayChar);
         }
 

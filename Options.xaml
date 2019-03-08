@@ -609,7 +609,7 @@
 
 
 
-        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="720" Height="370" Background="{x:Null}">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="720" Height="470" Background="{x:Null}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="0.5*"/>
                 <ColumnDefinition Width="0.5*"/>
@@ -743,6 +743,7 @@
                     <RowDefinition Height="29"/>
                     <RowDefinition Height="29"/>
                     <RowDefinition Height="29"/>
+                    <RowDefinition Height="29"/>
                 </Grid.RowDefinitions>
 
 
@@ -802,8 +803,10 @@
 					                  IsChecked="{Binding Path=Default.TransparentBackground, Mode=TwoWay}" Content="Transparent Background (Requires App Restart)" Margin="-2,0,2,0" />
                 <CheckBox Style="{DynamicResource SimpleCheckBox}" x:Name="PianoCheckBox" Grid.Row="9" Grid.ColumnSpan="2" Grid.Column="0" Foreground="#FFD1D1D1" FontSize="14" FontFamily="Segoe UI"
 					                  IsChecked="{Binding Path=Default.PianoMode, Mode=TwoWay}" Content="Piano Mode" Margin="-2,0,2,0" />
+                <CheckBox Style="{DynamicResource SimpleCheckBox}" x:Name="GameModeCheckBox" Grid.Row="10" Grid.ColumnSpan="2" Grid.Column="0" Foreground="#FFD1D1D1" FontSize="14" FontFamily="Segoe UI"
+					                  IsChecked="{Binding Path=Default.GameMode, Mode=TwoWay}" Content="Game Mode" Margin="-2,0,2,0" />
 
-                <StackPanel Orientation="Horizontal" Grid.Row="10" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                <StackPanel Orientation="Horizontal" Grid.Row="11" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Top">
 
                     <CheckBox Style="{DynamicResource SimpleCheckBox}"  x:Name="FadeChecked" Margin="0,0,0,0" Foreground="#FFD1D1D1" FontSize="14" FontFamily="Segoe UI" 
 					          IsChecked="{Binding Path=Default.FadeAway, Mode=TwoWay}" Content="Fade Shapes Away in" VerticalAlignment="Center" />
