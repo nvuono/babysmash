@@ -45,7 +45,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="WaveSynthType" Type="BabySmash.Music.Synth.WaveTypes" Scope="User">
-      <Value Profile="(Default)">RawWavetable</Value>
+      <Value Profile="(Default)">Sin</Value>
     </Setting>
     <Setting Name="PianoMode" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>

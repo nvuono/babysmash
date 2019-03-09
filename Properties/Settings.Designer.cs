@@ -193,7 +193,7 @@ namespace BabySmash.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("RawWavetable")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Sin")]
         public global::BabySmash.Music.Synth.WaveTypes WaveSynthType {
             get {
                 return ((global::BabySmash.Music.Synth.WaveTypes)(this["WaveSynthType"]));

@@ -20,6 +20,7 @@ using WinForms = System.Windows.Forms;
 
 namespace BabySmash
 {
+    using NAudio.Midi;
     using Newtonsoft.Json;
     using System.Globalization;
     using System.IO;
@@ -58,6 +59,8 @@ namespace BabySmash
         private Dictionary<string, List<UserControl>> figuresUserControlQueue = new Dictionary<string, List<UserControl>>();
         private ApplicationDeployment deployment = null;
         private WordFinder wordFinder = new WordFinder("Words.txt");
+
+        private NAudio.Midi.MidiIn midiIn = null;
 
         private bool pauseSpeechForDemand=false;
 
@@ -105,6 +108,45 @@ namespace BabySmash
             }
             MainWindow w = this.windows[0];
             w.UpdateAvailableLabel.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// From Mark Heath example http://mark-dot-net.blogspot.com/2008/10/midi-in-for-babysmash.html
+        /// </summary>
+        private void StartMonitoringMidi()
+        {
+            midiIn = new MidiIn(0); // default device
+            midiIn.MessageReceived += midiIn_MessageReceived;
+            midiIn.Start();
+        }
+
+        /// <summary>
+        /// From Mark Heath example http://mark-dot-net.blogspot.com/2008/10/midi-in-for-babysmash.html
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void midiIn_MessageReceived(object sender, MidiInMessageEventArgs e)
+        {
+            NoteOnEvent noteOnEvent = e.MidiEvent as NoteOnEvent;
+            if (noteOnEvent != null)
+            {
+                var uie = this.figuresUserControlQueue.FirstOrDefault().Value.FirstOrDefault();
+                if (uie != null) {
+                    ProcessMidiNoteOn(uie, noteOnEvent);
+                }
+            }
+
+            //Dispatcher.BeginInvoke(Action()=>new EventHandler<MidiInMessageEventArgs>(midiIn_MessageReceived), sender, e);
+        }
+
+        /// <summary>
+        /// From Mark Heath example http://mark-dot-net.blogspot.com/2008/10/midi-in-for-babysmash.html
+        /// </summary>
+        /// <param name="uie"></param>
+        /// <param name="noteOn"></param>
+        public void ProcessMidiNoteOn(FrameworkElement uie, NoteOnEvent noteOn)
+        {
+            AddFigure(uie, new string((char)('A' + noteOn.NoteNumber - 30), 1));
         }
 
         public void Launch()
@@ -273,7 +315,7 @@ namespace BabySmash
                 // if we're in game mode then send the input to the demandController
                 pauseSpeechForDemand = demandController.ProcessInput(displayChar);
             }
-            AddFigure(uie, displayChar);
+            AddFigure(uie, displayChar.ToString());
         }
 
 
@@ -282,7 +324,7 @@ namespace BabySmash
 
         }
 
-        private void AddFigure(FrameworkElement uie, char c)
+        private void AddFigure(FrameworkElement uie, string c)
         {
             string word = c.ToString();
             FigureTemplate template = null;
@@ -293,7 +335,7 @@ namespace BabySmash
             }
             else if (ControlMode == ControlModes.LetterToWord)
             {
-                string imgWord = ImageVocab.GetWordBasedOnFirstLetter(c);
+                string imgWord = ImageVocab.GetWordBasedOnFirstLetter(c[0]);
                 word = imgWord;
 
                 if (String.IsNullOrWhiteSpace(word))
@@ -366,16 +408,19 @@ namespace BabySmash
             }
         }
 
-        private static void PianoControl(char c)
+        private static void PianoControl(string c)
         {
             Dictionary<char, string> keyboardPianoMap = new Dictionary<char, string>()
             {
               {'Q',"Gs3" }, {'W',"As3" },             {'R',"Cs4" }, {'T',"Ds4" },          {'U',"Fs4" }, {'I',"Gs4" }, {'O',"As4" },         {'[',"Cs5" }, {']',"Ds5" },
                     { 'A',"A3" }, {'S',"B3" }, {'D',"C4" }, {'F',"D4" }, {'G',"E4" }, {'H',"F4" }, {'J',"G4" }, {'K',"A4" }, {'L',"B4" }, {';',"C5" }, {'\'',"D5" }
             };
-            if (keyboardPianoMap.ContainsKey(c))
+            if (keyboardPianoMap.ContainsKey(c[0]))
             {
-                BabySmash.Music.Synth.BeepBeepWave(300, (Music.Pitch.StringToPitch[keyboardPianoMap[c]].Freq), 500, Properties.Settings.Default.WaveSynthType);
+                Music.Synth.WaveTypes wvType = Properties.Settings.Default.WaveSynthType;
+                wvType = Music.Synth.WaveTypes.Triangle;
+                BabySmash.Music.Synth.ThreadBeep(0.9, (Music.Pitch.StringToPitch[keyboardPianoMap[c[0]]].Freq), 1500, wvType,false,false);
+                BabySmash.Music.Synth.ThreadBeep(0.9, (Music.Pitch.StringToPitch["E4"].Freq), 1500, wvType, false, false);
             }
         }
 
