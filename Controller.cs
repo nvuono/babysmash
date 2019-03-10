@@ -37,6 +37,8 @@ namespace BabySmash
 
     public class Controller
     {
+        Music.Synth AudioSynth = null;
+
         ControlModes ControlMode = ControlModes.LetterToWord; //ControlModes.Piano;
         static Random rnd = new Random(); // not thread safe but our babies will be ok
         [DllImport("user32.dll")]
@@ -62,7 +64,7 @@ namespace BabySmash
 
         private NAudio.Midi.MidiIn midiIn = null;
 
-        private bool pauseSpeechForDemand=false;
+        private bool pauseSpeechForDemand = false;
 
         /// <summary>Prevents a default instance of the Controller class from being created.</summary>
         private Controller() { }
@@ -131,7 +133,8 @@ namespace BabySmash
             if (noteOnEvent != null)
             {
                 var uie = this.figuresUserControlQueue.FirstOrDefault().Value.FirstOrDefault();
-                if (uie != null) {
+                if (uie != null)
+                {
                     ProcessMidiNoteOn(uie, noteOnEvent);
                 }
             }
@@ -230,7 +233,6 @@ namespace BabySmash
 
             //Only show the info label on the FIRST monitor.
             windows[0].infoLabel.Visibility = Visibility.Visible;
-
             //Startup sound
             if (Properties.Settings.Default.PlayStartupSound)
             {
@@ -248,6 +250,8 @@ namespace BabySmash
                     ShowOptionsDialog();
                 }
             }
+            AudioSynth = new Music.Synth();
+
             timer.Start();
         }
 
@@ -328,8 +332,8 @@ namespace BabySmash
         {
             string word = c.ToString();
             FigureTemplate template = null;
-            
-            if(Properties.Settings.Default.PianoMode)
+
+            if (Properties.Settings.Default.PianoMode)
             {
                 PianoControl(c);
             }
@@ -408,7 +412,7 @@ namespace BabySmash
             }
         }
 
-        private static void PianoControl(string c)
+        private void PianoControl(string c)
         {
             Dictionary<char, string> keyboardPianoMap = new Dictionary<char, string>()
             {
@@ -419,8 +423,7 @@ namespace BabySmash
             {
                 Music.Synth.WaveTypes wvType = Properties.Settings.Default.WaveSynthType;
                 wvType = Music.Synth.WaveTypes.Triangle;
-                BabySmash.Music.Synth.ThreadBeep(0.9, (Music.Pitch.StringToPitch[keyboardPianoMap[c[0]]].Freq), 1500, wvType,false,false);
-                BabySmash.Music.Synth.ThreadBeep(0.9, (Music.Pitch.StringToPitch["E4"].Freq), 1500, wvType, false, false);
+                AudioSynth.ThreadBeep(0.9, (Music.Pitch.StringToPitch[keyboardPianoMap[c[0]]].Freq), 1500, wvType, true, true);
             }
         }
 
@@ -566,7 +569,7 @@ namespace BabySmash
             MouseDraw(main, ptCenter);
             isDrawing = true;
             main.CaptureMouse();
-            
+
             Win32Audio.PlayWavResource("smallbumblebee.wav");
         }
 

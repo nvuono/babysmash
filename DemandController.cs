@@ -1,26 +1,21 @@
-﻿using BabySmash.Properties;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Deployment.Application;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-using MouseEventArgs = System.Windows.Input.MouseEventArgs;
-using WinForms = System.Windows.Forms;
 
 namespace BabySmash
 {
+
+    public enum GameTypes
+    {
+        AlphabetSequence, //Repeats A B C to Z and user presses corresponding letter
+        NumberSequence, // Repeats counting 1 to 10 and user presses corresponding key
+        SpellWholeWord, // can ask to spell whole word given 3 blanks like CAT presents _ _ _ 
+        PressFirstLetterForPicture, // GIven picture of CAT, says "cat", presents "_ A T" and asks for user to press missing letter
+        MathCount, // show X number of cats and user has to press number
+        MathAddNumbers, // arithmetic presents "1 + 2" and user expected to press 3
+        MousePointAtPicture // says a word "Dog" and asks user to point mouse cursor/click on the dog emoji rendered
+    }
+
     public enum DemandState
     {
         Startup, Pending, Presented,
